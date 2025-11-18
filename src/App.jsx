@@ -25,6 +25,7 @@ export default function App() {
     alignItems: "center",     // horizontal centering
     textAlign: "center",
     padding: "20px",
+    backgroundColor: "#f9f9f9",
   };
 
   // Wait for Firebase auth user
@@ -54,6 +55,7 @@ export default function App() {
         )}
         {page === "pledge" && (
           <IntegrityPledge
+          firebase_uid={firebaseUID} 
             onNext={() => setPage("experiment")}
             onBack={() => setPage("instructions")}
           />

@@ -1,15 +1,30 @@
-// components/IntegrityPledge.jsx
 import { useState } from "react";
+import { db } from "../config/firestore";
+import { doc, updateDoc, serverTimestamp } from "firebase/firestore";
 
-export default function IntegrityPledge({ onNext, onBack }) {
+export default function IntegrityPledge({ onNext, onBack, firebase_uid }) {
   const [pledged, setPledged] = useState(false);
 
   const handleCheckboxChange = () => setPledged((prev) => !prev);
 
-  const handleSubmit = () => {
-    if (pledged) {
-      console.log("Integrity pledged at:", new Date().toISOString());
-      onNext();
+  const handleSubmit = async () => {
+    try {
+      if (firebase_uid) {
+        const userRef = doc(db, "user", firebase_uid);
+        await updateDoc(userRef, {
+          integrityPledged: true,
+          integrityTimestamp: serverTimestamp(),
+        });
+        
+        console.log("Integrity pledge recorded for UID:", firebase_uid);
+      }else{
+            console.log("No firebase_uid found.");
+
+        }
+      onNext(); // proceed
+    } catch (err) {
+      console.error("Error saving integrity pledge:", err);
+      alert("Failed to record pledge. Please try again.");
     }
   };
 
@@ -73,15 +88,9 @@ export default function IntegrityPledge({ onNext, onBack }) {
             }}
           >
             Submit
-
           </button>
         </div>
       </div>
     </div>
   );
 }
-
-
-
-
-

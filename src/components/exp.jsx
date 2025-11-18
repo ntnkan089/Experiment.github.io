@@ -1,117 +1,230 @@
 // components/Experiment.jsx
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { db } from "../config/firestore";
+import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 
-// Example props: onFinish is called when all trials are done
-export default function Experiment({ onFinish }) {
-  const totalTrials = 3; // number of problems/trials
-  const totalImages = 6; // images per trial
-  const targetIndices = [2, 4, 1]; // example correct indices per trial
+/* ----------------------------------------------
+   DEFINE EXPERIMENT IMAGE POOL
+------------------------------------------------*/
 
-  const [currentTrial, setCurrentTrial] = useState(0);
+const ALL_IMAGES = [
+  "image_02018.jpg","image_02296.jpg","image_02408.jpg","image_02512.jpg","image_02533.jpg","image_02598.jpg",
+  "image_02612.jpg","image_02685.jpg","image_02732.jpg","image_02770.jpg","image_04510.jpg","image_04530.jpg",
+  "image_04614.jpg","image_04641.jpg","image_04843.jpg","image_05013.jpg","image_05195.jpg","image_05275.jpg",
+  "image_05310.jpg","image_05349.jpg","image_07280.jpg","image_07597.jpg","image_07814.jpg","image_07890.jpg",
+  "image_08022.jpg","image_08072.jpg","image_08096.jpg","image_08105.jpg"
+];
+
+function pickImages(n) {
+  const shuffled = [...ALL_IMAGES].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, n).map((img) => `/images/test_images/${img}`);
+}
+
+function makeTrial() {
+  const images = pickImages(12);
+  const correctIndex = Math.floor(Math.random() * 12);
+  return { images, correctIndex };
+}
+
+/* PHASES */
+const PHASE_0 = { name: "Comprehension Check", is_comprehension: true, trials: [makeTrial(), makeTrial(), makeTrial()] };
+const PHASE_1 = { name: "Phase 1", trials: [makeTrial(), makeTrial(), makeTrial()] };
+const PHASE_2 = { name: "Phase 2", trials: [makeTrial(), { ...makeTrial(), is_attention_check: true }, makeTrial()] };
+const PHASE_3 = { name: "Phase 3", trials: [makeTrial(), makeTrial(), makeTrial()] };
+
+const PHASES = [PHASE_0, PHASE_1, PHASE_2, PHASE_3];
+
+
+/* ---------------------------------------------------
+   MAIN COMPONENT
+---------------------------------------------------- */
+
+export default function Experiment({ firebase_uid, onFinish }) {
+  const [phaseIndex, setPhaseIndex] = useState(0);
+  const [trialIndex, setTrialIndex] = useState(0);
   const [selectedIndex, setSelectedIndex] = useState(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [feedback, setFeedback] = useState(null);
-  const [timer, setTimer] = useState(0);
 
-  const targetIndex = targetIndices[currentTrial];
+  // Timer states
+  const [timeLeft, setTimeLeft] = useState(30);
+  const timerRef = useRef(null);
 
-  // Timer logic
+  const phase = PHASES[phaseIndex];
+  const trial = phase.trials[trialIndex];
+  const images = trial.images;
+  const correctIndex = trial.correctIndex;
+
+  /* ---------------- TIMER CONTROL ---------------- */
   useEffect(() => {
-    if (isSubmitted) return; // pause timer on submit
-    const interval = setInterval(() => setTimer((t) => t + 1), 1000);
-    return () => clearInterval(interval);
-  }, [isSubmitted]);
+    if (isSubmitted) return; // Pause timer
+    timerRef.current = setInterval(() => setTimeLeft((t) => t - 1), 1000);
+    return () => clearInterval(timerRef.current);
+  }, [isSubmitted, trialIndex, phaseIndex]);
 
-  const handleSelect = (index) => setSelectedIndex(index);
+  useEffect(() => {
+    if (timeLeft <= 0 && !isSubmitted) {
+      setIsSubmitted(true);
+      setFeedback("Time up! Incorrect");
+    }
+  }, [timeLeft, isSubmitted]);
 
-  const handleSubmit = () => {
+  const handleSelect = (i) => setSelectedIndex(i);
+
+  /* --------------- SAVE TRIAL TO FIRESTORE ---------------- */
+  const saveTrial = async (correct) => {
+    if (!firebase_uid) return;
+
+    const data = {
+      trial_id: trialIndex,
+      phase: phase.name,
+      is_attention_check: trial.is_attention_check || false,
+      is_comprehension_check: phase.is_comprehension || false,
+      create_time: new Date(),
+      end_time: new Date(),
+      performance: correct ? 1 : 0,
+      best_choice: { index: correctIndex, image: images[correctIndex] },
+      user_choice: { index: selectedIndex, image: images[selectedIndex] },
+      time_used: 30 - timeLeft,
+      timestamp: serverTimestamp(),
+    };
+
+    const docRef = doc(
+      db,
+      "user",
+      firebase_uid,
+      "experiment",
+      phase.name,
+      "trial",
+      `trial-${trialIndex}`
+    );
+
+    await setDoc(docRef, data);
+    console.log("Trial saved:", data);
+  };
+
+  /* ----------------- SUBMIT ANSWER ----------------- */
+  const handleSubmit = async () => {
     if (selectedIndex === null) return;
 
+    clearInterval(timerRef.current);
+
+    const correct = selectedIndex === correctIndex;
     setIsSubmitted(true);
-    const correct = selectedIndex === targetIndex;
-    setFeedback({ correct, correctIndex: targetIndex });
+    setFeedback(correct ? "Correct!" : "Incorrect");
 
-    // TODO: save trial data to DB here
-    console.log(
-      `Trial ${currentTrial + 1}: User selected ${selectedIndex}, correct: ${correct}`
-    );
+    await saveTrial(correct);
   };
 
-  const handleNextProblem = () => {
-    if (currentTrial + 1 < totalTrials) {
-      setCurrentTrial(currentTrial + 1);
-      setSelectedIndex(null);
-      setIsSubmitted(false);
-      setFeedback(null);
-      setTimer(0);
-    } else {
-      // Finished all trials
-      if (onFinish) onFinish();
+  /* ---------------- GO TO NEXT TRIAL / PHASE ------------------ */
+  const handleNext = () => {
+    setIsSubmitted(false);
+    setSelectedIndex(null);
+    setFeedback(null);
+    setTimeLeft(30);
+
+    if (trialIndex + 1 < phase.trials.length) {
+      setTrialIndex((t) => t + 1);
+      return;
     }
+    if (phaseIndex + 1 < PHASES.length) {
+      setPhaseIndex((p) => p + 1);
+      setTrialIndex(0);
+      return;
+    }
+    if (onFinish) onFinish();
   };
 
+  /* ---------------- UI ---------------- */
   return (
     <div style={{ maxWidth: 900, margin: "0 auto", padding: 20 }}>
-      <h2>
-        Experiment Trial {currentTrial + 1} / {totalTrials}
-      </h2>
-      <p>Timer: {timer} seconds</p>
-      <p>
-        <b>Target:</b> Class {targetIndex}
-      </p>
 
-      <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-        {Array.from({ length: totalImages }).map((_, index) => (
+      {/* HEADER */}
+      <h2>
+        {phase.name} — Trial {trialIndex + 1} / {phase.trials.length}
+      </h2>
+
+      {/* TIMER */}
+      <div style={{ fontSize: 20, fontWeight: "bold", marginBottom: 10 }}>
+        Time Remaining: {timeLeft}s
+      </div>
+
+      {/* INSTRUCTIONS */}
+      <div style={{
+        background: "#f2f2f2",
+        padding: 10,
+        borderRadius: 8,
+        marginBottom: 10
+      }}>
+        <b>Instruction:</b> Select the image that matches the target class.
+      </div>
+
+      {/* TARGET LABEL (random placeholder text) */}
+      <div style={{
+        fontSize: 18,
+        marginBottom: 10,
+        fontWeight: "bold"
+      }}>
+        Target Class: <span style={{ color: "blue" }}>Example Label</span>
+      </div>
+
+      {/* SELECTION DISPLAY */}
+      <div style={{ marginBottom: 10 }}>
+        <b>Your Selection:</b> {selectedIndex !== null ? selectedIndex : "None"}
+      </div>
+
+      {/* IMAGE GRID */}
+      <div style={{
+        display: "flex",
+        gap: 12,
+        flexWrap: "wrap",
+        justifyContent: "center"
+      }}>
+        {images.map((img, i) => (
           <div
-            key={index}
-            onClick={() => handleSelect(index)}
+            key={i}
+            onClick={() => !isSubmitted && handleSelect(i)}
             style={{
-              width: 100,
-              height: 100,
-              border: selectedIndex === index ? "3px solid blue" : "1px solid gray",
-              backgroundColor:
-                isSubmitted && index === targetIndex
-                  ? "lightgreen"
-                  : "lightgray",
+              width: 140,
+              height: 140,
+              border: selectedIndex === i ? "3px solid blue" : "1px solid #ccc",
+              backgroundColor: isSubmitted && i === correctIndex ? "lightgreen" : "white",
+              padding: 5,
+              cursor: isSubmitted ? "default" : "pointer",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              cursor: "pointer",
             }}
           >
-            Image {index + 1}
+            <img src={img} style={{ maxWidth: "100%", maxHeight: "100%" }} />
           </div>
         ))}
       </div>
 
+      {/* BUTTON */}
       <div style={{ marginTop: 20 }}>
         {!isSubmitted ? (
           <button onClick={handleSubmit} disabled={selectedIndex === null}>
             Confirm and Submit
           </button>
         ) : (
-          <button onClick={handleNextProblem}>
-            {currentTrial + 1 === totalTrials ? "Finish Experiment" : "Next Problem"}
-          </button>
+          <button onClick={handleNext}>Next Problem</button>
         )}
       </div>
 
-      {isSubmitted && feedback && (
-        <div style={{ marginTop: 20 }}>
-          {feedback.correct ? (
-            <p style={{ color: "green" }}>Correct!</p>
-          ) : (
-            <p style={{ color: "red" }}>
-              Incorrect. The correct image was {feedback.correctIndex + 1}.
-            </p>
-
+      {/* FEEDBACK */}
+      {isSubmitted && (
+        <p style={{
+          marginTop: 20,
+          color: feedback === "Correct!" ? "green" : "red",
+          fontWeight: "bold"
+        }}>
+          {feedback} <br />
+          {feedback !== "Correct!" && (
+            <>Correct Image Index: <b>{correctIndex}</b></>
           )}
-        </div>
+        </p>
       )}
     </div>
   );
 }
-
-
-
-
