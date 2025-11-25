@@ -3,11 +3,15 @@ import { useState, useEffect, useEffectEvent, useRef } from "react";
 import { db } from "../config/firestore.js";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 
+
+
+
 /* ----------------------------------------------
    DEFINE EXPERIMENT IMAGE POOL
 ------------------------------------------------*/
-
+const url = import.meta.env.BASE_URL
 const ALL_IMAGES = [
+
   "image_02018.jpg","image_02296.jpg","image_02408.jpg","image_02512.jpg","image_02533.jpg","image_02598.jpg",
   "image_02612.jpg","image_02685.jpg","image_02732.jpg","image_02770.jpg","image_04510.jpg","image_04530.jpg",
   "image_04614.jpg","image_04641.jpg","image_04843.jpg","image_05013.jpg","image_05195.jpg","image_05275.jpg",
@@ -17,7 +21,7 @@ const ALL_IMAGES = [
 
 function pickImages(n) {
   const shuffled = [...ALL_IMAGES].sort(() => Math.random() - 0.5);
-  return shuffled.slice(0, n).map((img) => `/images/test_images/${img}`);
+  return shuffled.slice(0, n).map((img) => `${url}/images/test_images/${img}`);
 }
 
 function makeTrial() {
