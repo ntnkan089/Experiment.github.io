@@ -21,7 +21,7 @@ const ALL_IMAGES = [
 
 function pickImages(n) {
   const shuffled = [...ALL_IMAGES].sort(() => Math.random() - 0.5);
-  return shuffled.slice(0, n).map((img) => `${url}images/test_images/${img}`);
+  return shuffled.slice(0, n).map((img) => `${url}/images/test_images/${img}`);
 }
 
 function makeTrial() {
