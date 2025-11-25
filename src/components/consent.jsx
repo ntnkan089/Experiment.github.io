@@ -5,6 +5,7 @@ import { doc, setDoc, serverTimestamp, updateDoc } from "firebase/firestore";
 export default function Consent({ onNext, firebase_uid }) {
   const [checked, setChecked] = useState(false);
 
+  const url = import.meta.env.BASE_URL
   // Write metadata on component load
   useEffect(() => {
     if (!firebase_uid) return;
@@ -70,7 +71,7 @@ export default function Consent({ onNext, firebase_uid }) {
         </div>
 
         <img
-          src="/images/uci_seal.png"
+         src={`${url}images/uci_seal.png`}
           alt="UCI Logo"
           style={{ width: 120, height: "auto", objectFit: "contain" }}
         />

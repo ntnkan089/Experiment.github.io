@@ -30,9 +30,9 @@ export default function Header({ title }) {
 
   return (
     <header style={headerStyle}>
-      <img src="/images/BCeater-right.png" alt="Left Logo" style={leftLogoStyle} />
+      <img src={import.meta.env.BASE_URL + 'images/BCeater-right.png'} alt="Left Logo" style={leftLogoStyle} />
       <h2 style={titleStyle}>{title}</h2>
-      <img src="/images/BCeater-left.png" alt="Right Logo" style={rightLogoStyle} />
+      <img src={import.meta.env.BASE_URL + 'images/BCeater-left.png'} alt="Right Logo" style={rightLogoStyle} />
     </header>
   );
 }
