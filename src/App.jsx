@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import Consent from "./components/consent";
 import Instructions from "./components/Instructions";
 import IntegrityPledge from "./components/IntegrityPledge";
-import Experiment from "./components/exp";
+import Experiment from "./components/Experiment";
 import Complete from "./components/Complete";
 import Header from "./components/Header";
 import { auth } from "./config/firestore";
