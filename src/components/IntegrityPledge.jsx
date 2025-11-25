@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { db } from "../config/firestore";
+import { db } from "../config/firestore.js";
 import { doc, updateDoc, serverTimestamp } from "firebase/firestore";
 
 export default function IntegrityPledge({ onNext, onBack, firebase_uid }) {

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { db } from "../config/firestore"; // import Firestore
+import { db } from "../config/firestore.js"; // import Firestore
 import { doc, setDoc, serverTimestamp, updateDoc } from "firebase/firestore";
 
 export default function Consent({ onNext, firebase_uid }) {

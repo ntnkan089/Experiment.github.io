@@ -1,6 +1,6 @@
 // components/Complete.jsx
 import { useState } from "react";
-import { db, auth } from "../config/firestore";
+import { db, auth } from "../config/firestore.js";
 import { doc, updateDoc, arrayUnion } from "firebase/firestore";
 
 export default function Complete() {

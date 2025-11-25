@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
-import Consent from "./components/consent";
-import Instructions from "./components/Instructions";
-import IntegrityPledge from "./components/IntegrityPledge";
-import Experiment from "./components/Experiment";
-import Complete from "./components/Complete";
-import Header from "./components/Header";
-import { auth } from "./config/firestore";
+import Consent from "./components/consent.jsx";
+import Instructions from "./components/Instructions.jsx";
+import IntegrityPledge from "./components/IntegrityPledge.jsx";
+import Experiment from "./components/Experiment.jsx";
+import Complete from "./components/Complete.jsx";
+import Header from "./components/Header.jsx";
+import { auth } from "./config/firestore.js";
 
 export default function App() {
   const [page, setPage] = useState("consent");

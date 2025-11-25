@@ -1,6 +1,6 @@
 // components/Experiment.jsx
 import { useState, useEffect, useEffectEvent, useRef } from "react";
-import { db } from "../config/firestore";
+import { db } from "../config/firestore.js";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 
 /* ----------------------------------------------
@@ -112,7 +112,6 @@ useEffect(() => {
 }, [timeLeft, isSubmitted]);
   const handleSelect = (i) => setSelectedIndex(i);
 
-  /* --------------- SAVE TRIAL TO FIRESTORE ---------------- */
   
 
   /* ----------------- SUBMIT ANSWER ----------------- */// Button base
