@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
-import InstPage1 from "./inst/inst1";
-import InstPage2 from "./inst/inst2";
-import InstPage3 from "./inst/inst3";
-import InstPage4 from "./inst/inst4";
-import InstPage5 from "./inst/inst5";
+import InstPage1 from "./inst/inst1.jsx";
+import InstPage2 from "./inst/inst2.jsx";
+import InstPage3 from "./inst/inst3.jsx";
+import InstPage4 from "./inst/inst4.jsx";
+import InstPage5 from "./inst/inst5.jsx";
 
-import { db, auth } from "../config/firestore"; // your Firestore config
+import { db, auth } from "../config/firestore.js"; // your Firestore config
 import { doc, setDoc } from "firebase/firestore";
 
 export default function Instructions({ onNext, onBack }) {
