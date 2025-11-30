@@ -4,6 +4,7 @@ import Instructions from "./components/Instructions.jsx";
 import IntegrityPledge from "./components/IntegrityPledge.jsx";
 import Experiment from "./components/Experiment.jsx";
 import Complete from "./components/Complete.jsx";
+
 import Header from "./components/Header.jsx";
 import { auth } from "./config/firestore.js";
 

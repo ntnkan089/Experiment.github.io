@@ -64,6 +64,7 @@ export default function Instructions({ onNext, onBack }) {
   }, []);
 
   return (
+
     <div style={{ maxWidth: 800, margin: "0 auto", padding: 20 }}>
       <h2>Instructions ({page + 1}/{pages.length})</h2>
 
@@ -83,3 +84,11 @@ export default function Instructions({ onNext, onBack }) {
     </div>
   );
 }
+
+
+
+
+
+
+
+

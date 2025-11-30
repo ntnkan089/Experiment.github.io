@@ -15,13 +15,15 @@ export default function IntegrityPledge({ onNext, onBack, firebase_uid }) {
           integrityPledged: true,
           integrityTimestamp: serverTimestamp(),
         });
-        
-        console.log("Integrity pledge recorded for UID:", firebase_uid);
-      }else{
-            console.log("No firebase_uid found.");
 
-        }
-      onNext(); // proceed
+        console.log("Integrity pledge recorded for UID:", firebase_uid);
+      } else {
+        console.log("No firebase_uid found.");
+      }
+
+      alert("Thank you! You may now proceed to the experiment.");
+
+      onNext(); // proceed to experiment
     } catch (err) {
       console.error("Error saving integrity pledge:", err);
       alert("Failed to record pledge. Please try again.");
@@ -46,7 +48,6 @@ export default function IntegrityPledge({ onNext, onBack, firebase_uid }) {
           thoroughly.
         </p>
 
-        {/* Checkbox */}
         <div
           style={{
             border: "2px solid #0064a4",
@@ -65,7 +66,6 @@ export default function IntegrityPledge({ onNext, onBack, firebase_uid }) {
           </label>
         </div>
 
-        {/* Buttons */}
         <div
           style={{
             marginTop: 20,
