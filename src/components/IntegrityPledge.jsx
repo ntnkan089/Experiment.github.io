@@ -21,7 +21,7 @@ export default function IntegrityPledge({ onNext, onBack, firebase_uid }) {
         console.log("No firebase_uid found.");
       }
 
-      alert("Thank you! You may now proceed to the experiment.");
+      alert("Thank you! You may now proceed to the Comprehension Check.");
 
       onNext(); // proceed to experiment
     } catch (err) {

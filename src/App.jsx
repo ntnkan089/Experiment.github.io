@@ -6,9 +6,15 @@ import Experiment from "./components/Experiment.jsx";
 import Complete from "./components/Complete.jsx";
 
 import Header from "./components/Header.jsx";
+
+
+import LearningPage from "./components/Learning.jsx";
 import { auth } from "./config/firestore.js";
 
+
+import ComprehensionCheck from "./components/Comprehension.jsx";
 export default function App() {
+
   const [page, setPage] = useState("consent");
   const [firebaseUID, setFirebaseUID] = useState(null);
 
@@ -54,13 +60,27 @@ export default function App() {
             onBack={() => setPage("consent")}
           />
         )}
+        
         {page === "pledge" && (
           <IntegrityPledge
           firebase_uid={firebaseUID} 
-            onNext={() => setPage("experiment")}
+            onNext={() => setPage("comprehension")}
             onBack={() => setPage("instructions")}
           />
         )}
+        {page === "comprehension" && (
+      <ComprehensionCheck
+        onComplete={() => setPage("learning")}
+          onFail={() => window.location.href = "https://app.prolific.co/submissions/complete?cc=XXXX"}    
+          />
+        )}
+        {page === "learning" && (
+          <LearningPage
+          firebase_uid={firebaseUID} 
+            onNext={() => setPage("experiment")}
+          />
+        )}
+        
         {page === "experiment" && firebaseUID && (
           <Experiment
             firebase_uid={firebaseUID}
@@ -79,5 +99,7 @@ export default function App() {
 
 
 }
+
+
 
 
