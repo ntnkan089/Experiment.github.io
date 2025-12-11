@@ -25,8 +25,16 @@ function makeTrial() {
 const PHASE_1 = { name: "Phase 1", trials: [makeTrial(), makeTrial(), makeTrial()] };
 const PHASE_2 = { name: "Phase 2", trials: [makeTrial(), { ...makeTrial(), is_attention_check: true }, makeTrial()] };
 const PHASES = [PHASE_1, PHASE_2];
+const DEFAULT_PHASES = PHASES;
 
-export default function Experiment({ firebase_uid, onFinish }) {
+// Difficulty-check group: only 5 trials, no phases
+function makeDifficultyCheckTrials() {
+  return Array.from({ length: 5 }, () => makeTrial());
+}
+const t = makeDifficultyCheckTrials();
+
+export default function Experiment({ firebase_uid, group, onFinish }) {
+
   // Refs
   const trialStartRef = useRef(0);
   const submitTimeRef = useRef(0);
@@ -47,7 +55,13 @@ export default function Experiment({ firebase_uid, onFinish }) {
   const [totalCorrectCount, setTotalCorrectCount] = useState(0);
 
   // Current trial info
-  const phase = PHASES[phaseIndex];
+  // Select experiment structure based on group
+  const EFFECTIVE_PHASES =
+    group === "difficulty-check"
+      ? [{ name: "Difficulty Check", trials: t }]
+      : PHASES;
+
+  const phase = EFFECTIVE_PHASES[phaseIndex];
   const trial = phase.trials[trialIndex];
   const images = trial.images;
   const correctIndex = trial.correctIndex;
@@ -137,7 +151,7 @@ export default function Experiment({ firebase_uid, onFinish }) {
       reselect_num: reselectRef.current,
       think_time: timeLeft<=0 ? 30 : thinkTime,
       total_time: totalTimeUsed,
-      on_screen_time: onScreenTimeRef.current>30?30:onScreenTimeRef.current,
+      on_screen_time: onScreenTimeRef.current>thinkTime?thinkTime:onScreenTimeRef.current,
       timestamp: serverTimestamp(),
     };
 
@@ -193,8 +207,20 @@ export default function Experiment({ firebase_uid, onFinish }) {
       return;
     }
 
-    if (phaseIndex + 1 < PHASES.length) {
-      alert(`${phase.name} complete. Moving to ${PHASES[phaseIndex + 1].name}.`);
+    if (group === "difficulty-check") {
+      if (trialIndex + 1 < phase.trials.length) {
+        setTrialIndex(t => t + 1);
+        return;
+      }
+
+      alert("Difficulty check completed!");
+      if (onFinish) onFinish();
+      return;
+    }
+
+    // Default multi-phase flow (AI / No-AI conditions)
+    if (phaseIndex + 1 < EFFECTIVE_PHASES.length) {
+      alert(`${phase.name} complete. Moving to ${EFFECTIVE_PHASES[phaseIndex + 1].name}.`);
       setPhaseIndex(p => p + 1);
       setTrialIndex(0);
       setPhaseCorrectCount(0);
@@ -273,7 +299,10 @@ export default function Experiment({ firebase_uid, onFinish }) {
   </div>
 
   {/* Grid with row labels */}
-  <div style={{ display: "flex", flexWrap: "wrap", gap: 12, justifyContent: "center" }}>
+  <div style={{  display: "grid",
+    gridTemplateColumns: "repeat(4, 140px)",  // 4 columns
+    gap: 12,
+    justifyContent: "center", }}>
     {images.map((img, i) => {
       const { row, col } = getRowCol(i);
       const isSelected = selectedIndex === i;
