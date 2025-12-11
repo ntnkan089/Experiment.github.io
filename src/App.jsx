@@ -102,7 +102,7 @@ export default function App() {
           <ComprehensionCheck
             group={group}
             onComplete={() =>
-              setPage(group === "difficulty-check" ? "experiment" : "learning")
+              setPage("learning")
             }
             onFail={() =>
               (window.location.href =
@@ -111,7 +111,7 @@ export default function App() {
           />
         )}
 
-        {page === "learning" && group !== "difficulty-check" && (
+        {page === "learning" && (
           <LearningPage
             firebase_uid={firebaseUID}
             group={group}
