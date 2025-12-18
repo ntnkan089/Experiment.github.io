@@ -6,6 +6,7 @@ export default function Header({ title }) {
     backgroundColor: "#0064a4",
     padding: "10px 0",
     width: "100%",
+    height: "75px",
     position: "relative",
   };
 

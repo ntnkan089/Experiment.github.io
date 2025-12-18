@@ -73,7 +73,7 @@ export default function ComprehensionCheck({ onComplete, onFail }) {
   return (
     <div style={{ maxWidth: 1100, margin: "0 auto", padding: 20 }}>
       <h2 style={{ textAlign: "center", marginBottom: 20 }}>
-        Comprehension Check {checkIndex + 1} / {CHECKS.length}
+        Comprehension Check - {checkIndex + 1} 
       </h2>
 
       <div style={{ display: "flex", gap: 40, alignItems: "flex-start" }}>
@@ -87,12 +87,12 @@ export default function ComprehensionCheck({ onComplete, onFail }) {
           </div>
           <div>
             <b>Your Selection:</b>{" "}
-            {selectedRowCol ? `Row ${selectedRowCol.row}, Col ${selectedRowCol.col}` : "None"}
+            {selectedRowCol ? `Row ${selectedRowCol.row+1}, Col ${selectedRowCol.col+1}` : "None"}
           </div>
 
           {showCorrect && selectedIndex !== null && (
             <div style={{ color: "red", fontWeight: "bold" }}>
-              Incorrect! Correct Image: Row {correctRowCol.row}, Col {correctRowCol.col}
+              Incorrect! Correct Image: Row {correctRowCol.row+1}, Col {correctRowCol.col+1}
             </div>
           )}
 
@@ -116,19 +116,19 @@ export default function ComprehensionCheck({ onComplete, onFail }) {
         </div>
 
         {/* RIGHT PANEL — IMAGE GRID */}
-        <div style={{ width: "65%" }}>
+        <div style={{ width: "68%" }}>
           {/* Column headers */}
           <div style={{ display: "flex", marginLeft: 40 }}>
-            <div style={{ width: 40 }}></div>
+            <div style={{ width: 31 }}></div>
             {[...Array(columns)].map((_, c) => (
-              <div key={c} style={{ width: 140, textAlign: "center", fontWeight: "bold" }}>{c}</div>
+              <div key={c} style={{ width: 140, textAlign: "center", fontWeight: "bold" }}>{c==0?`Column ${c+1}`:c+1}</div>
             ))}
           </div>
 
           {/* Rows */}
           {[...Array(rows)].map((_, r) => (
             <div key={r} style={{ display: "flex", marginBottom: 12, alignItems: "center" }}>
-              <div style={{ width: 40, fontWeight: "bold", textAlign: "center" }}>{r}</div>
+              <div style={{ width: 40, fontWeight: "bold", textAlign: "center" }}>{r==0?`Row ${r+1}`:r+1}</div>
               {currentCheck.images.slice(r * columns, (r + 1) * columns).map((img, i) => {
                 const index = r * columns + i;
                 const isSelected = selectedIndex === index;

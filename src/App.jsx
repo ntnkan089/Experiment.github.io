@@ -8,7 +8,6 @@ import Complete from "./components/Complete.jsx";
 import Header from "./components/Header.jsx";
 import LearningPage from "./components/Learning.jsx";
 import ComprehensionCheck from "./components/Comprehension.jsx";
-
 import { auth } from "./config/firestore.js";
 
 export default function App() {
@@ -26,7 +25,6 @@ export default function App() {
     epsi: "with-ai",
     check: "difficulty-check",
   };
-
   const group = GROUP_MAP[groupCode] || "no-ai";
 
   // Use 'derivedGroup' throughout your component
@@ -70,7 +68,7 @@ export default function App() {
   // ==========
   return (
     <div style={appStyle}>
-      <Header title="MADLAB Experiment" />
+      <Header title="" />
 
       <div style={containerStyle}>
         {page === "consent" && firebaseUID && (

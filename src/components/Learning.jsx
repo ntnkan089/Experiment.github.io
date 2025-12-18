@@ -1,77 +1,167 @@
 import { useState, useEffect, useRef } from "react";
+import { db } from "../config/firestore.js";
+import { doc, setDoc } from "firebase/firestore";
 
 const url = import.meta.env.BASE_URL;
-const ALL_IMAGES = [
-  "image_02018.jpg","image_02296.jpg","image_02408.jpg","image_02512.jpg","image_02533.jpg",
-  "image_02598.jpg","image_02612.jpg","image_02685.jpg","image_02732.jpg","image_02770.jpg",
-  "image_04510.jpg","image_04530.jpg","image_04614.jpg","image_04641.jpg","image_04843.jpg"
-];
 
-const CLASS_COUNT = 3;
-const IMAGES_PER_CLASS = 4;
 
-function getClassImages() {
-  const classes = [];
-  for (let i = 0; i < CLASS_COUNT; i++) {
-    classes.push(ALL_IMAGES.slice(i * IMAGES_PER_CLASS, (i + 1) * IMAGES_PER_CLASS));
-  }
-  return classes.map(cls => cls.map(img => `${url}/images/test_images/${img}`));
-}
-
-export default function LearningPage({ onNext }) {
-  const classes = getClassImages();
-  const [timeLeft, setTimeLeft] = useState(5*1); // 5 minutes in seconds
+export default function LearningPage({ onNext, firebase_uid }) {
+  const [manifest, setManifest] = useState(null);
+  const [timeLeft, setTimeLeft] = useState(5 * 3);
   const timerRef = useRef(null);
+const onScreenTimeRef = useRef(0);     // milliseconds
+const lastVisibleTimeRef = useRef(0);
+const pageVisibleRef = useRef(true);
+useEffect(() => {
+   
+    onScreenTimeRef.current = 0;
+    lastVisibleTimeRef.current = Date.now();
+    pageVisibleRef.current = true;
+  const handleVisibilityChange = () => {
+    const now = Date.now();
 
+    if (pageVisibleRef.current) {
+      onScreenTimeRef.current += now - lastVisibleTimeRef.current;
+    }
+
+    pageVisibleRef.current = !document.hidden;
+    lastVisibleTimeRef.current = now;
+  };
+
+  document.addEventListener("visibilitychange", handleVisibilityChange);
+  return () =>
+    document.removeEventListener("visibilitychange", handleVisibilityChange);
+}, []);
+
+  /* load manifest */
   useEffect(() => {
-    timerRef.current = setInterval(() => setTimeLeft(t => t - 1), 1000);
+fetch(`${import.meta.env.BASE_URL}manifest.json`)      .then(res => res.json())
+      .then(data => setManifest(data))
+  }, []);
+
+  /* timer */
+  useEffect(() => {
+    timerRef.current = setInterval(() => {
+      setTimeLeft(t => t - 1);
+    }, 1000);
     return () => clearInterval(timerRef.current);
   }, []);
 
-  useEffect(() => {
-    if (timeLeft <= 0) {
-      clearInterval(timerRef.current);
-      alert("Time is up! You will now proceed to the experiment.");
-      if (onNext) onNext();
-    }
-  }, [timeLeft, onNext]);
 
-  const formatTime = (sec) => {
-    const m = Math.floor(sec / 60);
-    const s = sec % 60;
-    return `${m.toString().padStart(2,"0")}:${s.toString().padStart(2,"0")}`;
+const hasSavedRef = useRef(false);
+
+useEffect(() => {
+  const updateLearningOnScreenTime = async (onScreenTimeMs) => {
+    if (!firebase_uid) return;
+
+    try {
+      await setDoc(
+        doc(db, "user", firebase_uid),
+        {
+          learning: {
+            on_screen_time_ms: onScreenTimeMs,
+            expected_ms: 300000,
+            timestamp: Date.now(),
+          },
+        },
+        { merge: true }
+      );
+    } catch (err) {
+      console.error("Failed to update learning on-screen time:", err);
+    }
+
   };
+  if (timeLeft <= 0 && !hasSavedRef.current) {
+    hasSavedRef.current = true;
+
+    const now = Date.now();
+
+    if (pageVisibleRef.current) {
+      onScreenTimeRef.current += now - lastVisibleTimeRef.current;
+    }
+
+    const onScreenTimeMs = onScreenTimeRef.current;
+
+    console.log("Learning on-screen time (ms):", onScreenTimeMs);
+
+    updateLearningOnScreenTime(onScreenTimeMs);
+
+    alert("Time is up! Proceeding to experiment.");
+    onNext?.();
+  }
+}, [timeLeft, onNext, firebase_uid]);
+
+
+  const formatTime = sec =>
+    `${String(Math.floor(sec / 60)).padStart(2, "0")}:${String(sec % 60).padStart(2, "0")}`;
+
+  if (!manifest) return <div>Loading…</div>;
 
   return (
-    <div style={{ maxWidth: 1100, margin: "0 auto", padding: 20 }}>
-      <h2 style={{ textAlign: "center", marginBottom: 20 }}>Learning Phase</h2>
+    <div style={{ maxWidth: 1200, margin: "0 auto", padding: 20 }}>
+      <h2 style={{ textAlign: "center", marginBottom: 20 }}>
+        Learning Phase
+      </h2>
 
-      <div style={{ fontSize: 18, marginBottom: 20, textAlign: "center" }}>
-        You have 5 minutes to review the classes and their example images shown below.
+      <div style={{ textAlign: "center", fontSize: 18}}>
+        Review each flower class and its example images.
+        
+      </div>
+      <div style={{ textAlign: "center", fontSize: 18, marginBottom: 10 }}>
+        <b>Note:</b> The displayed examples represent only a subset of the species and are not exhaustive.
+        
       </div>
 
-      <div style={{ fontSize: 20, fontWeight: "bold", marginBottom: 30, textAlign: "center" }}>
+      <div style={{ textAlign: "center", fontSize: 20, fontWeight: "bold", marginBottom: 50 }}>
         Time Remaining: {formatTime(timeLeft)}
       </div>
-
-      {classes.map((clsImages, clsIdx) => (
-        <div
-          key={clsIdx}
+<div
+          
           style={{
             display: "flex",
-            alignItems: "flex-start",
-            marginBottom: 40,
-            gap: 20,
+            alignItems: "center",
+            marginBottom: 32,
+            gap: 24,
           }}
         >
-          {/* Class label on the left */}
-          <div style={{ width: 150, fontSize: 18, fontWeight: "bold" }}>
-            Class {clsIdx + 1}
+          {/* Class info */}
+          <div style={{ width: 200 }}>
+            
+            <div style={{ fontSize: 21, fontWeight: "bold", color:"red" }}>
+              Class Name
+            </div>
+          </div>
+          <div style={{ width: 460 }}>
+            
+            <div style={{ fontSize: 21, fontWeight: "bold", color:"red" }}>
+              Example Images
+            </div>
+          </div>
+          </div>
+      {Object.entries(manifest)
+  .sort((a, b) => Number(a[1].classLabel) - Number(b[1].classLabel))
+  .map(([key, cls]) => ( 
+
+        <div
+          key={key}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            marginBottom: 32,
+            gap: 24,
+          }}
+        >
+          {/* Class info */}
+          <div style={{ width: 200 }}>
+            
+            <div style={{ fontSize: 21, fontWeight: "bold" }}>
+              {cls.species[0].toUpperCase() + cls.species.slice(1)}
+            </div>
           </div>
 
-          {/* Images on the right */}
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
-            {clsImages.map((img, i) => (
+          {/* Images */}
+          <div style={{ display: "flex", gap: 12 }}>
+            {cls.images.map((img, i) => (
               <div
                 key={i}
                 style={{
@@ -84,7 +174,11 @@ export default function LearningPage({ onNext }) {
                   justifyContent: "center",
                 }}
               >
-                <img src={img} style={{ maxWidth: "100%", maxHeight: "100%" }} />
+                <img
+                  src={`${url}/images/${img}`}
+                  alt={cls.species}
+                  style={{ maxWidth: "100%", maxHeight: "100%" }}
+                />
               </div>
             ))}
           </div>

@@ -1,0 +1,92 @@
+{
+  "2_pocket_orchid": {
+    "classLabel": "2",
+    "species": "pocket orchid",
+    "images": [
+      "Image_Classification/1214_learning_examples/1214_learning_examples/2_pocket_orchid/image_05092.jpg",
+      "Image_Classification/1214_learning_examples/1214_learning_examples/2_pocket_orchid/image_05109.jpg",
+      "Image_Classification/1214_learning_examples/1214_learning_examples/2_pocket_orchid/image_05121.jpg"
+    ]
+  },
+  "40_lenten_rose": {
+    "classLabel": "40",
+    "species": "lenten rose",
+    "images": [
+      "Image_Classification/1214_learning_examples/1214_learning_examples/40_lenten_rose/image_04576.jpg",
+      "Image_Classification/1214_learning_examples/1214_learning_examples/40_lenten_rose/image_04597.jpg",
+      "Image_Classification/1214_learning_examples/1214_learning_examples/40_lenten_rose/image_04620.jpg"
+    ]
+  },
+  "51_petunia": {
+    "classLabel": "51",
+    "species": "petunia",
+    "images": [
+      "Image_Classification/1214_learning_examples/1214_learning_examples/51_petunia/image_01402.jpg",
+      "Image_Classification/1214_learning_examples/1214_learning_examples/51_petunia/image_03963.jpg",
+      "Image_Classification/1214_learning_examples/1214_learning_examples/51_petunia/image_03988.jpg"
+    ]
+  },
+  "61_cautleya_spicata": {
+    "classLabel": "61",
+    "species": "cautleya spicata",
+    "images": [
+      "Image_Classification/1214_learning_examples/1214_learning_examples/61_cautleya_spicata/image_06261.jpg",
+      "Image_Classification/1214_learning_examples/1214_learning_examples/61_cautleya_spicata/image_06268.jpg",
+      "Image_Classification/1214_learning_examples/1214_learning_examples/61_cautleya_spicata/image_06284.jpg"
+    ]
+  },
+  "68_bearded_iris": {
+    "classLabel": "68",
+    "species": "bearded iris",
+    "images": [
+      "Image_Classification/1214_learning_examples/1214_learning_examples/68_bearded_iris/image_05909.jpg",
+      "Image_Classification/1214_learning_examples/1214_learning_examples/68_bearded_iris/image_05929.jpg",
+      "Image_Classification/1214_learning_examples/1214_learning_examples/68_bearded_iris/image_05954.jpg"
+    ]
+  },
+  "70_tree_poppy": {
+    "classLabel": "70",
+    "species": "tree poppy",
+    "images": [
+      "Image_Classification/1214_learning_examples/1214_learning_examples/70_tree_poppy/image_05279.jpg",
+      "Image_Classification/1214_learning_examples/1214_learning_examples/70_tree_poppy/image_05296.jpg",
+      "Image_Classification/1214_learning_examples/1214_learning_examples/70_tree_poppy/image_05299.jpg"
+    ]
+  },
+  "73_water_lily": {
+    "classLabel": "73",
+    "species": "water lily",
+    "images": [
+      "Image_Classification/1214_learning_examples/1214_learning_examples/73_water_lily/image_00258.jpg",
+      "Image_Classification/1214_learning_examples/1214_learning_examples/73_water_lily/image_00276.jpg",
+      "Image_Classification/1214_learning_examples/1214_learning_examples/73_water_lily/image_00330.jpg"
+    ]
+  },
+  "84_columbine": {
+    "classLabel": "84",
+    "species": "columbine",
+    "images": [
+      "Image_Classification/1214_learning_examples/1214_learning_examples/84_columbine/image_02578.jpg",
+      "Image_Classification/1214_learning_examples/1214_learning_examples/84_columbine/image_02618.jpg",
+      "Image_Classification/1214_learning_examples/1214_learning_examples/84_columbine/image_02622.jpg"
+    ]
+  },
+  "87_magnolia": {
+    "classLabel": "87",
+    "species": "magnolia",
+    "images": [
+      "Image_Classification/1214_learning_examples/1214_learning_examples/87_magnolia/image_05462.jpg",
+      "Image_Classification/1214_learning_examples/1214_learning_examples/87_magnolia/image_05487.jpg",
+      "Image_Classification/1214_learning_examples/1214_learning_examples/87_magnolia/image_05494.jpg"
+    ]
+  },
+  "91_hippeastrum": {
+    "classLabel": "91",
+    "species": "hippeastrum",
+    "images": [
+      "Image_Classification/1214_learning_examples/1214_learning_examples/91_hippeastrum/image_04830.jpg",
+      "Image_Classification/1214_learning_examples/1214_learning_examples/91_hippeastrum/image_04839.jpg",
+      "Image_Classification/1214_learning_examples/1214_learning_examples/91_hippeastrum/image_04875.jpg"
+    ]
+  }
+}

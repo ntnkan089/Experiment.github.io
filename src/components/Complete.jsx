@@ -30,17 +30,26 @@ export default function Complete() {
     strategy_text: "",
     overall_text: "",
   });
+const REQUIRED_FIELDS = [
+  "challenging",
+  "boring",
+  "confident",
+  "effort",
+  "strategy",
+  "seeing_correct_helped",
+  "prior_experience",
+];
 
   const handleChange = (field, value) => {
     setResponses((prev) => ({ ...prev, [field]: value }));
   };
 
   const allQuestionsAnswered = () => {
-    return (
-      Object.values(responses).every((v) => v !== "") &&
-      responses.ai_accuracy !== ""
+    return REQUIRED_FIELDS.every(
+      (field) => responses[field] !== ""
     );
   };
+
 
   const submitSurvey = async () => {
     if (!allQuestionsAnswered()) {

@@ -97,7 +97,7 @@ export default function Consent({ onNext, firebase_uid }) {
 
         <h4><b>Time Commitment</b></h4>
         <p>
-          This study typically takes less than <b>TODO minutes</b> to complete.
+          This study typically takes less than <b>50 minutes</b> to complete.
         </p>
 
         <h4><b>Benefits & Risks</b></h4>

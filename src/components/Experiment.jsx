@@ -3,35 +3,7 @@ import { db } from "../config/firestore.js";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 
 const url = import.meta.env.BASE_URL;
-const ALL_IMAGES = [
-  "image_02018.jpg","image_02296.jpg","image_02408.jpg","image_02512.jpg","image_02533.jpg","image_02598.jpg",
-  "image_02612.jpg","image_02685.jpg","image_02732.jpg","image_02770.jpg","image_04510.jpg","image_04530.jpg",
-  "image_04614.jpg","image_04641.jpg","image_04843.jpg","image_05013.jpg","image_05195.jpg","image_05275.jpg",
-  "image_05310.jpg","image_05349.jpg","image_07280.jpg","image_07597.jpg","image_07814.jpg","image_07890.jpg",
-  "image_08022.jpg","image_08072.jpg","image_08096.jpg","image_08105.jpg"
-];
 
-function pickImages(n) {
-  const shuffled = [...ALL_IMAGES].sort(() => Math.random() - 0.5);
-  return shuffled.slice(0, n).map(img => `${url}/images/test_images/${img}`);
-}
-
-function makeTrial() {
-  const images = pickImages(12);
-  const correctIndex = Math.floor(Math.random() * 12);
-  return { images, correctIndex };
-}
-
-const PHASE_1 = { name: "Phase 1", trials: [makeTrial(), makeTrial(), makeTrial()] };
-const PHASE_2 = { name: "Phase 2", trials: [makeTrial(), { ...makeTrial(), is_attention_check: true }, makeTrial()] };
-const PHASES = [PHASE_1, PHASE_2];
-const DEFAULT_PHASES = PHASES;
-
-// Difficulty-check group: only 5 trials, no phases
-function makeDifficultyCheckTrials() {
-  return Array.from({ length: 5 }, () => makeTrial());
-}
-const t = makeDifficultyCheckTrials();
 
 export default function Experiment({ firebase_uid, group, onFinish }) {
 
@@ -53,26 +25,23 @@ export default function Experiment({ firebase_uid, group, onFinish }) {
   const [timeLeft, setTimeLeft] = useState(30);
   const [phaseCorrectCount, setPhaseCorrectCount] = useState(0);
   const [totalCorrectCount, setTotalCorrectCount] = useState(0);
+const [phase1Trials, setPhase1Trials] = useState([]);
+const [phase2Trials, setPhase2Trials] = useState([]);
 
-  // Current trial info
+
   // Select experiment structure based on group
-  const EFFECTIVE_PHASES =
-    group === "difficulty-check"
-      ? [{ name: "Difficulty Check", trials: t }]
-      : PHASES;
-
-  const phase = EFFECTIVE_PHASES[phaseIndex];
-  const trial = phase.trials[trialIndex];
-  const images = trial.images;
-  const correctIndex = trial.correctIndex;
-
-  const columns = 4; // number of columns in the grid
-  //const rows = Math.ceil(images.length / columns);
-
-  const getRowCol = (i) => ({ row: Math.floor(i / columns), col: i % columns });
-
-  // Reset trial
-  useEffect(() => {
+const EFFECTIVE_PHASES =
+  group === "difficulty-check"
+    ? [{
+        name: "Difficulty Check",
+        trials: [...phase2Trials]
+          .slice(0, 5),
+      }]
+    : [
+        { name: "Phase 1", trials: phase1Trials.slice(0, 3) },
+        { name: "Phase 2", trials: phase2Trials.slice(0, 3) },
+      ];
+ useEffect(() => {
     trialStartRef.current = Date.now();
     submitTimeRef.current = 0;
     onScreenTimeRef.current = 0;
@@ -85,15 +54,15 @@ export default function Experiment({ firebase_uid, group, onFinish }) {
   useEffect(() => {
     const handleVisibilityChange = () => {
       const now = Date.now();
-      if (pageVisibleRef.current && !isSubmitted) {
-        onScreenTimeRef.current += (now - lastVisibleTimeRef.current) / 1000;
+      if (pageVisibleRef.current) {
+        onScreenTimeRef.current += (now - lastVisibleTimeRef.current);
       }
       pageVisibleRef.current = !document.hidden;
       lastVisibleTimeRef.current = now;
     };
     document.addEventListener("visibilitychange", handleVisibilityChange);
     return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
-  }, [isSubmitted]);
+  }, []);
 
   // Handle user selection
   const handleSelect = (i) => {
@@ -110,33 +79,81 @@ export default function Experiment({ firebase_uid, group, onFinish }) {
   }, [isSubmitted, trialIndex, phaseIndex]);
 
   // Handle time-up
-  const handleTimeUp = useEffectEvent(() => {
+ 
+useEffect(() => {
+  fetch(`${url}questions.json`)
+    .then(r => r.json())
+    .then(allTrials => {
+      setPhase1Trials(allTrials.filter(t => t.phase === 1).slice(0, 40));
+      setPhase2Trials(allTrials.filter(t => t.phase === 2).slice(0, 10));
+    });
+}, []);
+const phase = EFFECTIVE_PHASES[phaseIndex];
+const trial = phase.trials[trialIndex];
+
+const images = trial?.selectedImages;
+const correctIndex = trial?.correctAnswerIndex;
+ const handleTimeUp = useEffectEvent(() => {
     if (isSubmitted) return;
     setIsSubmitted(true);
-    setFeedback("Time up! Incorrect");
+    if(!selectedIndex||selectedIndex!==correctIndex)
+      {
+        setFeedback("Time up! Incorrect")
+      }
+    else{
+      setFeedback("Time up! Correct")
+    }
     submitTimeRef.current = null;
     clearInterval(timerRef.current);
 
     if (pageVisibleRef.current) {
-      onScreenTimeRef.current += (Date.now() - lastVisibleTimeRef.current) / 1000;
+      onScreenTimeRef.current += (Date.now() - lastVisibleTimeRef.current);
     }
   });
 
   useEffect(() => {
     if (timeLeft <= 0) handleTimeUp();
   }, [timeLeft]);
+if (
+  EFFECTIVE_PHASES.length === 0 ||
+  !EFFECTIVE_PHASES[phaseIndex] ||
+  EFFECTIVE_PHASES[phaseIndex].trials.length === 0
+) {
+  return <div>Loading experiment…</div>;
+}
 
+
+
+if (!phase1Trials.length || !phase2Trials.length) {
+  return <div>Loading…</div>;
+}
+
+
+
+  const columns = 4; // number of columns in the grid
+  //const rows = Math.ceil(images.length / columns);
+
+const getRowCol = (i) => ({
+  row: Math.floor(i / columns)+1,
+  col: (i % columns),
+});
+
+  // Reset trial
+ 
   // Save trial
   const saveTrial = async (correct, curCorrect, totalCorrect) => {
     if (!firebase_uid) return;
 
     const timedOut = selectedIndex === null;
-    const thinkTime = ((submitTimeRef.current ?? Date.now()) - trialStartRef.current) / 1000;
-    const totalTimeUsed = (Date.now() - trialStartRef.current) / 1000;
+    const thinkTime = ((submitTimeRef.current ?? Date.now()) - trialStartRef.current) ;
+    const totalTimeUsed = (Date.now() - trialStartRef.current) ;
 
     const data = {
+      timed_out: timedOut,
       trial_id: trialIndex,
       phase: phase.name,
+      true_label: trial.trueAnswerLabel,
+      true_class: trial.trueClassName,
       is_attention_check: trial.is_attention_check || false,
       is_comprehension_check: phase.is_comprehension || false,
       create_time: new Date(trialStartRef.current),
@@ -149,9 +166,9 @@ export default function Experiment({ firebase_uid, group, onFinish }) {
       best_choice: [{ index: correctIndex, image: images[correctIndex] }],
       user_choice: timedOut ? [{ index: "Time out.", image: "Time out." }] : [{ index: selectedIndex, image: images[selectedIndex] }],
       reselect_num: reselectRef.current,
-      think_time: timeLeft<=0 ? 30 : thinkTime,
+      think_time: timeLeft<=0 ? 30000 : thinkTime,
       total_time: totalTimeUsed,
-      on_screen_time: onScreenTimeRef.current>thinkTime?thinkTime:onScreenTimeRef.current,
+      on_screen_time: onScreenTimeRef.current>totalTimeUsed?totalTimeUsed:onScreenTimeRef.current,
       timestamp: serverTimestamp(),
     };
 
@@ -178,9 +195,7 @@ export default function Experiment({ firebase_uid, group, onFinish }) {
     setIsSubmitted(true);
     setFeedback(selectedIndex === correctIndex ? "Correct!" : "Incorrect");
 
-    if (pageVisibleRef.current) {
-      onScreenTimeRef.current += (Date.now() - lastVisibleTimeRef.current) / 1000;
-    }
+    
   };
 
   // Next trial
@@ -189,7 +204,9 @@ export default function Experiment({ firebase_uid, group, onFinish }) {
     const correct = selectedIndex === correctIndex;
     const curCorrect = phaseCorrectCount + (correct ? 1 : 0);
     const totalCorrect = totalCorrectCount + (correct ? 1 : 0);
-
+  if (pageVisibleRef.current) {
+      onScreenTimeRef.current += (Date.now() - lastVisibleTimeRef.current) ;
+    }
     await saveTrial(correct, curCorrect, totalCorrect);
 
     if (correct) {
@@ -242,7 +259,7 @@ export default function Experiment({ firebase_uid, group, onFinish }) {
   return (
     <div style={{ maxWidth: 1100, margin: "0 auto", padding: 20 }}>
       <h2 style={{ textAlign: "center", marginBottom: 20 }}>
-        {phase.name} — Trial {trialIndex + 1} / {phase.trials.length}
+        {phase.name} — Trial {trialIndex + 1}
       </h2>
 
       <div style={{ display: "flex", gap: 40, alignItems: "flex-start" }}>
@@ -253,12 +270,12 @@ export default function Experiment({ firebase_uid, group, onFinish }) {
             <b>Instruction:</b> Select the image that matches the target class.
           </div>
           <div style={{ fontSize: 18, fontWeight: "bold" }}>
-            Target Class: <span style={{ color: "blue" }}>Example Label {correctIndex}</span>
+            Target Class: <span style={{ color: "blue" }}> {trial?.trueClassName[0].toUpperCase()+trial?.trueClassName.slice(1)} {correctIndex}</span>
           </div>
           <div>
             <b>Your Selection:</b>{" "}
             {selectedRowCol
-              ? `Row ${selectedRowCol.row}, Col ${selectedRowCol.col} `
+              ? `Row ${selectedRowCol.row}, Col ${selectedRowCol.col+1} `
               : "None"}
           </div>
 
@@ -277,10 +294,10 @@ export default function Experiment({ firebase_uid, group, onFinish }) {
           </div>
 
           {isSubmitted && (
-            <p style={{ marginTop: 10, color: feedback === "Correct!" ? "green" : "red", fontWeight: "bold" }}>
+            <p style={{ marginTop: 10, color: feedback === "Correct!"||feedback ==="Time up! Correct" ? "green" : "red", fontWeight: "bold" }}>
               {feedback} <br />
               {feedback !== "Correct!" && (
-                <>Correct Image: Row {correctRowCol.row}, Col {correctRowCol.col} </>
+                <>Correct Image: Row {correctRowCol.row}, Col {correctRowCol.col+1} </>
               )}
             </p>
           )}
@@ -288,62 +305,69 @@ export default function Experiment({ firebase_uid, group, onFinish }) {
 
         {/* RIGHT PANEL — IMAGE GRID */}
         {/* RIGHT PANEL — IMAGE GRID WITH ROW/COL LABELS */}
-<div style={{ width: "65%", position: "relative" }}>
+<div style={{ width: "58%", position: "relative" }}>
   {/* Column numbers */}
-  <div style={{ display: "flex", marginLeft: 30, marginBottom: 5 }}>
+  <div style={{ display: "flex", marginLeft: 30, marginBottom: 5, justifyItems: "center" }}>
     {[...Array(columns)].map((_, c) => (
       <div key={c} style={{ width: 140, textAlign: "center", fontWeight: "bold" }}>
-        {c}
+        {c==0? `Column ${c+1}`:c+1}
       </div>
     ))}
   </div>
 
   {/* Grid with row labels */}
-  <div style={{  display: "grid",
-    gridTemplateColumns: "repeat(4, 140px)",  // 4 columns
-    gap: 12,
-    justifyContent: "center", }}>
-    {images.map((img, i) => {
-      const { row, col } = getRowCol(i);
-      const isSelected = selectedIndex === i;
-      const isCorrect = isSubmitted && i === correctIndex;
+  <div
+  style={{
+    display: "grid",
+    gridTemplateColumns: "40px repeat(4, 140px)", // label + 4 images
+    gap: 8,
+    justifyContent: "center",
+    alignItems: "center",
+  }}
+>
+  {images.map((img, i) => {
+    const row = Math.floor(i / columns) + 1;
+    const isSelected = selectedIndex === i;
+    const isCorrect = isSubmitted && i === correctIndex;
 
-      return (
-        <div key={i} style={{ display: "flex", alignItems: "center" }}>
-          {/* Row label only at start of each row */}
-          {col === 0 && (
-            <div style={{
-              width: 30,
+    return (
+      <>
+        {/* Row label only at row start */}
+        {i % columns === 0 && (
+          <div
+            style={{
               textAlign: "center",
               fontWeight: "bold",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}>
-              {row}
-            </div>
-          )}
-          {/* Image */}
-          <div
-            onClick={() => handleSelect(i)}
-            style={{
-              width: 140,
-              height: 140,
-              border: isSelected ? "3px solid blue" : "1px solid #ccc",
-              backgroundColor: isCorrect ? "lightgreen" : "white",
-              padding: 5,
-              cursor: isSubmitted ? "default" : "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
             }}
           >
-            <img src={img} style={{ maxWidth: "100%", maxHeight: "100%" }} />
+            {row==1 ? `Row ${row}` : row}
           </div>
+        )}
+
+        {/* Image cell */}
+        <div
+          key={i}
+          onClick={() => handleSelect(i)}
+          style={{
+            width: 128,
+            height: 128,
+            border: isSelected ? "3px solid blue" : "1px solid #ccc",
+            backgroundColor: isCorrect ? "lightgreen" : "white",
+            padding: 3,
+            cursor: isSubmitted ? "default" : "pointer",
+            display: "flex",
+            gap: 8,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <img src={img} style={{ maxWidth: "100%", maxHeight: "100%" }} />
         </div>
-      );
-    })}
-  </div>
+      </>
+    );
+  })}
+</div>
+
 </div>
 
       </div>
