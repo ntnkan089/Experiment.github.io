@@ -77,7 +77,7 @@ export default function Consent({ onNext, firebase_uid }) {
       </h3>
 
       {/* FULL STUDY TEXT */}
-      <div style={{ textAlign: "left" }}>
+      <div className="no-select" style={{ textAlign: "left" }}>
 
         <p>
           Please carefully read the information below before you decide to participate in this study. 

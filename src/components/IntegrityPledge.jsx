@@ -40,7 +40,7 @@ export default function IntegrityPledge({ onNext, onBack, firebase_uid }) {
     >
       <h2 style={{ textAlign: "center", color: "#0064a4" }}>Integrity Pledge</h2>
 
-      <div style={{ textAlign: "left" }}>
+      <div className="no-select" style={{ textAlign: "left" }}>
         <p>
           By checking the box below, you pledge that you have read and understood
           the instructions completely, and that you will participate in this study

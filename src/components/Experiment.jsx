@@ -15,7 +15,7 @@ export default function Experiment({ firebase_uid, group, onFinish }) {
   const lastVisibleTimeRef = useRef(0);
   const pageVisibleRef = useRef(true);
   const reselectRef = useRef(0);
-
+const [trialKey, setTrialKey] = useState(0);
   // State
   const [phaseIndex, setPhaseIndex] = useState(0);
   const [trialIndex, setTrialIndex] = useState(0);
@@ -93,6 +93,12 @@ const trial = phase.trials[trialIndex];
 
 const images = trial?.selectedImages;
 const correctIndex = trial?.correctAnswerIndex;
+useEffect(() => {
+  images?.forEach((src) => {
+    const img = new Image();
+    img.src = src;
+  });
+}, [images]);
  const handleTimeUp = useEffectEvent(() => {
     if (isSubmitted) return;
     setIsSubmitted(true);
@@ -182,8 +188,8 @@ const getRowCol = (i) => ({
       `trial-${trialIndex}`
     );
 
-    await setDoc(docRef, data);
-    console.log("Trial saved:", data);
+    await setDoc(docRef, data);/* 
+    console.log("Trial saved:", data); */
   };
 
   // Submit trial
@@ -220,12 +226,14 @@ const getRowCol = (i) => ({
     setTimeLeft(30);
 
     if (trialIndex + 1 < phase.trials.length) {
+      setTrialKey(k => k + 1);
       setTrialIndex(t => t + 1);
       return;
     }
 
     if (group === "difficulty-check") {
       if (trialIndex + 1 < phase.trials.length) {
+        setTrialKey(k => k + 1);
         setTrialIndex(t => t + 1);
         return;
       }
@@ -239,6 +247,7 @@ const getRowCol = (i) => ({
     if (phaseIndex + 1 < EFFECTIVE_PHASES.length) {
       alert(`${phase.name} complete. Moving to ${EFFECTIVE_PHASES[phaseIndex + 1].name}.`);
       setPhaseIndex(p => p + 1);
+      setTrialKey(k => k + 1);
       setTrialIndex(0);
       setPhaseCorrectCount(0);
       return;
@@ -265,14 +274,14 @@ const getRowCol = (i) => ({
       <div style={{ display: "flex", gap: 40, alignItems: "flex-start" }}>
         {/* LEFT PANEL */}
         <div style={{ width: "35%", display: "flex", flexDirection: "column", gap: 15 }}>
-          <div style={{ fontSize: 20, fontWeight: "bold" }}>Time Remaining: {timeLeft}s</div>
-          <div style={{ background: "#f2f2f2", padding: 10, borderRadius: 8 }}>
+          <div className="no-select" style={{ fontSize: 20, fontWeight: "bold" }}>Time Remaining: {timeLeft}s</div>
+          <div className="no-select" style={{ background: "#f2f2f2", padding: 10, borderRadius: 8 }}>
             <b>Instruction:</b> Select the image that matches the target class.
           </div>
-          <div style={{ fontSize: 18, fontWeight: "bold" }}>
+          <div className="no-select" style={{ fontSize: 18, fontWeight: "bold" }}>
             Target Class: <span style={{ color: "blue" }}> {trial?.trueClassName[0].toUpperCase()+trial?.trueClassName.slice(1)} {correctIndex}</span>
           </div>
-          <div>
+          <div className="no-select">
             <b>Your Selection:</b>{" "}
             {selectedRowCol
               ? `Row ${selectedRowCol.row}, Col ${selectedRowCol.col+1} `
@@ -346,8 +355,7 @@ const getRowCol = (i) => ({
 
         {/* Image cell */}
         <div
-          key={i}
-          onClick={() => handleSelect(i)}
+            key={`${trialKey}-${i}`}                      onClick={() => handleSelect(i)}
           style={{
             width: 128,
             height: 128,
@@ -361,7 +369,8 @@ const getRowCol = (i) => ({
             justifyContent: "center",
           }}
         >
-          <img src={img} style={{ maxWidth: "100%", maxHeight: "100%" }} />
+          <img src={img} loading="eager"
+    decoding="async" style={{ maxWidth: "100%", maxHeight: "100%" }} />
         </div>
       </>
     );

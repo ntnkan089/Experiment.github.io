@@ -22,7 +22,7 @@ export default function ComprehensionCheck({ onComplete, onFail }) {
   const [attempt, setAttempt] = useState(1);
   const [selectedIndex, setSelectedIndex] = useState(null);
   const [showCorrect, setShowCorrect] = useState(false);
-
+  const [key, setKey] = useState(0);
   const currentCheck = CHECKS[checkIndex];
   const columns = 3;
   const rows = Math.ceil(currentCheck.images.length / columns);
@@ -44,6 +44,7 @@ export default function ComprehensionCheck({ onComplete, onFail }) {
         setCheckIndex(checkIndex + 1);
         setAttempt(1);
         setSelectedIndex(null);
+        setKey(k => k + 1);
         setShowCorrect(false);
       } else {
         onComplete();
@@ -78,7 +79,7 @@ export default function ComprehensionCheck({ onComplete, onFail }) {
 
       <div style={{ display: "flex", gap: 40, alignItems: "flex-start" }}>
         {/* LEFT PANEL */}
-        <div style={{ width: "35%", display: "flex", flexDirection: "column", gap: 15 }}>
+        <div className="no-select" style={{ width: "35%", display: "flex", flexDirection: "column", gap: 15 }}>
           <div style={{ background: "#f2f2f2", padding: 10, borderRadius: 8 }}>
             <b>Instruction:</b> Select the image that matches the target class.
           </div>
@@ -135,7 +136,7 @@ export default function ComprehensionCheck({ onComplete, onFail }) {
                 const isCorrect = showCorrect && correctIndex === index;
                 return (
                   <div
-                    key={i}
+                    key={`${key}-${i}`}
                     onClick={() => handleSelect(index)}
                     style={{
                       width: 140,
