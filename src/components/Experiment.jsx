@@ -28,6 +28,7 @@ const [trialKey, setTrialKey] = useState(0);
 const [phase1Trials, setPhase1Trials] = useState([]);
 const [phase2Trials, setPhase2Trials] = useState([]);
 
+const [nextDisabled, setNextDisabled] = useState(false);
 
   // Select experiment structure based on group
 const EFFECTIVE_PHASES =
@@ -48,6 +49,8 @@ const EFFECTIVE_PHASES =
     lastVisibleTimeRef.current = Date.now();
     pageVisibleRef.current = true;
     reselectRef.current = 0;
+      setNextDisabled(false);
+
   }, [trialIndex, phaseIndex]);
 
   // Handle tab visibility
@@ -206,6 +209,8 @@ const getRowCol = (i) => ({
 
   // Next trial
   const handleNext = async () => {
+    if (nextDisabled) return;   // guard
+  setNextDisabled(true); 
     if (!submitTimeRef.current) submitTimeRef.current = Date.now();
     const correct = selectedIndex === correctIndex;
     const curCorrect = phaseCorrectCount + (correct ? 1 : 0);
@@ -298,7 +303,7 @@ const getRowCol = (i) => ({
                 Confirm and Submit
               </button>
             ) : (
-              <button style={actionBtn} onClick={handleNext}>Next Problem</button>
+              <button style={actionBtn}  disabled={nextDisabled} onClick={handleNext}>Next Problem</button>
             )}
           </div>
 
