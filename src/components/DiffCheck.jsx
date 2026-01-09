@@ -1,11 +1,53 @@
 import { useState, useEffect, useEffectEvent, useRef } from "react";
 import { db } from "../config/firestore.js";
-import { doc, setDoc, serverTimestamp } from "firebase/firestore";
+import { doc, setDoc, serverTimestamp, collection, getDocs, runTransaction } from "firebase/firestore";
 
 const url = import.meta.env.BASE_URL;
 
 
-export default function Experiment({ PID, group, onFinish }) {
+async function assignBalancedProblems(allProblems, numToAssign = 10) {
+  const statsSnap = await getDocs(collection(db, "difficulty_problem_stats"));
+  const countMap = {};
+  statsSnap.forEach(d => {
+    countMap[d.id] = d.data().completedCount || 0;
+  });
+  allProblems.forEach(p => {
+    if (countMap[p.id] == null) countMap[p.id] = 0;
+  });
+
+  // Sort by least completed
+  const sorted = [...allProblems].sort((a, b) => countMap[a.id] - countMap[b.id]);
+
+  // Randomly shuffle top candidates
+  const pool = sorted.slice(0, numToAssign * 2);
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+
+  return allProblems.slice(0, numToAssign);
+}
+
+// ----------------- increment completedCount on submit -----------------
+async function incrementProblemCount(questionId) {
+  const docRef = doc(db, "difficulty_problem_stats", questionId);
+
+  try {
+    await runTransaction(db, async (transaction) => {
+      const docSnap = await transaction.get(docRef);
+      if (!docSnap.exists()) {
+        transaction.set(docRef, { completedCount: 1 });
+      } else {
+        const currentCount = docSnap.data().completedCount || 0;
+        transaction.update(docRef, { completedCount: currentCount + 1 });
+      }
+    });
+  } catch (e) {
+    console.error("Failed to increment problem count:", e);
+  }
+}
+
+export default function DifficultyCheck({ PID, group, onFinish }) {
 
   // Refs
   const trialStartRef = useRef(0);
@@ -14,12 +56,12 @@ export default function Experiment({ PID, group, onFinish }) {
   const onScreenTimeRef = useRef(0);
   const lastVisibleTimeRef = useRef(0);
   const pageVisibleRef = useRef(true);
-  
   const reselectRef = useRef(0);
-  const [trialKey, setTrialKey] = useState(0);
+const [trialKey, setTrialKey] = useState(0);
+  const [timedOut, setTimedOut] = useState(false);
+
   // State
   const [phaseIndex, setPhaseIndex] = useState(0);
-  const [timedOut, setTimedOut] = useState(false);
   const [trialIndex, setTrialIndex] = useState(0);
   const [selectedIndex, setSelectedIndex] = useState(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -27,23 +69,16 @@ export default function Experiment({ PID, group, onFinish }) {
   const [timeLeft, setTimeLeft] = useState(30);
   const [phaseCorrectCount, setPhaseCorrectCount] = useState(0);
   const [totalCorrectCount, setTotalCorrectCount] = useState(0);
-  const [phase1Trials, setPhase1Trials] = useState([]);
-  const [phase2Trials, setPhase2Trials] = useState([]);
+  const [trials, setTrials] = useState([]);
 
-  const [nextDisabled, setNextDisabled] = useState(false);
+const [nextDisabled, setNextDisabled] = useState(false);
 
   // Select experiment structure based on group
-  const EFFECTIVE_PHASES =
-    group === "difficulty-check"
-    ? [{
+const EFFECTIVE_PHASES = [{
         name: "Difficulty Check",
-        trials: [...phase2Trials]
-          .slice(0, 5),
+        trials: trials
       }]
-    : [
-        { name: "Phase 1", trials: phase1Trials.slice(0, 3) },
-        { name: "Phase 2", trials: phase2Trials.slice(0, 8) },
-      ];
+   
  useEffect(() => {
     trialStartRef.current = Date.now();
     submitTimeRef.current = 0;
@@ -87,16 +122,15 @@ export default function Experiment({ PID, group, onFinish }) {
   // Handle time-up
  
 useEffect(() => {
-  fetch(`${url}questions.json`)
-    .then(r => r.json())
-    .then(allTrials => {
-      setPhase1Trials(allTrials.filter(t => t.phase === 1).slice(0, 40));
-      const phase2 = allTrials.filter(t => t.phase === 2).slice(0, 10);
-
-      const phase2WithAttention = [
-        ...phase2.slice(0, 5), // Q1–Q5
+    fetch(`${url}questions.json`)
+      .then(r => r.json())
+      .then(async allTrials => {
+        const diffTrials = allTrials;
+        const assigned = await assignBalancedProblems(diffTrials, 10);
+        const diff = [
+        ...assigned.slice(0, 5), // Q1–Q5
         {
-          ...phase2[4],       // copy Q5
+          ...assigned[4],       // copy Q5
           is_attention_check: true,
           instruction:
             "This is an attention check. Please select (row 3, column 4) — the lower right corner picture — to pass this attention check.",
@@ -104,13 +138,12 @@ useEffect(() => {
           trueClassName: "attention check",
           trueAnswerLabel: 0,
         },
-        ...phase2.slice(5),   // Q6+
+        ...assigned.slice(5),   // Q6+
       ];
+        setTrials(diff);
+      });
+  }, []);
 
-
-      setPhase2Trials(phase2WithAttention);
-    });
-}, []);
 
 const phase = EFFECTIVE_PHASES[phaseIndex];
 const trial = phase.trials[trialIndex];
@@ -126,6 +159,7 @@ useEffect(() => {
  const handleTimeUp = useEffectEvent(() => {
     if (isSubmitted) return;
     setTimedOut(true);
+
     setIsSubmitted(true);
     if(!selectedIndex||selectedIndex!==correctIndex)
       {
@@ -134,7 +168,6 @@ useEffect(() => {
     else{
       setFeedback("Time up! You did not submit a selection.")
     }
-
     submitTimeRef.current = null;
     clearInterval(timerRef.current);
 
@@ -156,7 +189,7 @@ if (
 
 
 
-if (!phase1Trials.length || !phase2Trials.length) {
+if (!trials.length) {
   return <div>Loading…</div>;
 }
 
@@ -210,7 +243,7 @@ const getRowCol = (i) => ({
       "experiment",
       phase.name,
       "trial",
-      trial.is_attention_check ? `attention-check` : `trial-${trialIndex}`
+    trial.is_attention_check ? `attention-check` : `trial-${trialIndex}`
     );
 
     await setDoc(docRef, data);/* 
@@ -235,13 +268,15 @@ const getRowCol = (i) => ({
   setNextDisabled(true); 
     if (!submitTimeRef.current) submitTimeRef.current = Date.now();
     const correct = !timedOut && (selectedIndex === correctIndex);
-    const curCorrect = phaseCorrectCount + (!timedOut && correct ? 1 : 0);
+    const curCorrect = phaseCorrectCount + (!timedOut &&correct ? 1 : 0);
     const totalCorrect = totalCorrectCount + (!timedOut &&correct ? 1 : 0);
-  if (pageVisibleRef.current) {
+    if (pageVisibleRef.current) {
       onScreenTimeRef.current += (Date.now() - lastVisibleTimeRef.current) ;
     }
     await saveTrial(correct, curCorrect, totalCorrect, timedOut);
-
+    if (selectedIndex !== null) {
+        await incrementProblemCount(trial.id); // <- trial.id must exist in your question array
+    }
     if (correct) {
       setPhaseCorrectCount(c => c + 1);
       setTotalCorrectCount(c => c + 1);
@@ -295,7 +330,7 @@ const getRowCol = (i) => ({
   return (
     <div style={{ maxWidth: 1100, margin: "0 auto", padding: 20 }}>
       <h2 style={{ textAlign: "center", marginBottom: 20 }}>
-        {phase.name} — Problem {trialIndex + 1}
+         Problem {trialIndex + 1}
       </h2>
 
       <div style={{ display: "flex", gap: 40, alignItems: "flex-start" }}>
@@ -305,9 +340,11 @@ const getRowCol = (i) => ({
           <div className="no-select" style={{ background: "#f2f2f2", padding: 10, borderRadius: 8 }}>
             <b>Instruction:</b> {trial.instruction? trial.instruction : "Select the image that matches the target class."}
           </div>
+          {!trial.is_attention_check && 
           <div className="no-select" style={{ fontSize: 18, fontWeight: "bold" }}>
             Target Class: <span style={{ color: "blue" }}> {trial?.trueClassName[0].toUpperCase()+trial?.trueClassName.slice(1)} {correctIndex}</span>
           </div>
+          }
           <div className="no-select">
             <b>Your Selection:</b>{" "}
             {selectedRowCol
@@ -330,7 +367,7 @@ const getRowCol = (i) => ({
           </div>
 
           {isSubmitted && (
-            <p style={{ marginTop: 10, color: feedback === "Correct!" ? "green" : "red", fontWeight: "bold" }}>
+            <p style={{ marginTop: 10, color: feedback === "Correct!"||feedback ==="Time up! Correct" ? "green" : "red", fontWeight: "bold" }}>
               {feedback} <br />
               {feedback !== "Correct!" && (
                 <>Correct Image: Row {correctRowCol.row}, Col {correctRowCol.col+1} </>

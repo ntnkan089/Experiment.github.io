@@ -1,11 +1,11 @@
 import { useState, useEffect, useRef } from "react";
-import { db } from "../config/firestore.js";
+import { db } from "../../config/firestore.js";
 import { doc, setDoc } from "firebase/firestore";
 
 const url = import.meta.env.BASE_URL;
 
 
-export default function LearningPage({ onNext, PID }) {
+export default function TestLearningPage({ onNext, PID }) {
   const [manifest, setManifest] = useState(null);
   const [timeLeft, setTimeLeft] = useState(5 * 3);
   const timerRef = useRef(null);
@@ -100,7 +100,7 @@ useEffect(() => {
   return (
     <div style={{ maxWidth: 1200, margin: "0 auto", padding: 20 }}>
       <h2 style={{ textAlign: "center", marginBottom: 20 }}>
-        Learning Phase
+        Learning Phase Test
       </h2>
 
       <div style={{ textAlign: "center", fontSize: 18}}>

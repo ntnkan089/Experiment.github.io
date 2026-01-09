@@ -1,11 +1,11 @@
 import { useState, useEffect, useEffectEvent, useRef } from "react";
-import { db } from "../config/firestore.js";
+import { db } from "../../config/firestore.js";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 
 const url = import.meta.env.BASE_URL;
 
 
-export default function Experiment({ PID, group, onFinish }) {
+export default function TestExperiment({ PID, group, onFinish }) {
 
   // Refs
   const trialStartRef = useRef(0);
@@ -295,7 +295,7 @@ const getRowCol = (i) => ({
   return (
     <div style={{ maxWidth: 1100, margin: "0 auto", padding: 20 }}>
       <h2 style={{ textAlign: "center", marginBottom: 20 }}>
-        {phase.name} — Problem {trialIndex + 1}
+        {phase.name} — Test Problem {trialIndex + 1}
       </h2>
 
       <div style={{ display: "flex", gap: 40, alignItems: "flex-start" }}>

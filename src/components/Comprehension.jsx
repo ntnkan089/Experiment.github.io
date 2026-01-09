@@ -47,6 +47,7 @@ export default function ComprehensionCheck({ onComplete, onFail }) {
         setKey(k => k + 1);
         setShowCorrect(false);
       } else {
+        alert("Great job! You’ve passed the comprehension check. You now have 5 minutes for the learning phase. Click OK to begin.");
         onComplete();
       }
     } else {

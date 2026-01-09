@@ -3,7 +3,7 @@ import { useState } from "react";
 import { db, auth } from "../config/firestore.js";
 import { doc, updateDoc, serverTimestamp, getDoc } from "firebase/firestore";
 
-export default function Complete() {
+export default function Complete({PID}) {
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [bonusAmount, setBonusAmount] = useState(null);
@@ -64,7 +64,7 @@ const REQUIRED_FIELDS = [
         alert("User not logged in.");
         return;
       }
-      const userRef = doc(db, "user", uid);
+      const userRef = doc(db, "user", PID);
 
       await updateDoc(userRef, {
         survey: {

@@ -1,42 +1,26 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { db } from "../config/firestore.js";
-import { doc, setDoc, serverTimestamp, updateDoc } from "firebase/firestore";
+import { doc, serverTimestamp, updateDoc } from "firebase/firestore";
 
-export default function Consent({ onNext, firebase_uid }) {
+export default function Consent({ onNext, firebase_uid, PID }) {
   const [checked, setChecked] = useState(false);
   const url = import.meta.env.BASE_URL;
 
   // Write metadata on component load
-  useEffect(() => {
-    if (!firebase_uid) return;
+  
 
-    const writeMetadata = async () => {
-      try {
-        const docRef = doc(db, "user", firebase_uid);
-        await setDoc(
-          docRef,
-          { consentPageVisited: true, timestamp: serverTimestamp() },
-          { merge: true }
-        );
-        console.log("Metadata written for UID:", firebase_uid);
-      } catch (err) {
-        console.error("Error writing metadata:", err);
-      }
-    };
-
-    writeMetadata();
-  }, [firebase_uid]);
 
   const handleSubmitConsent = async () => {
     if (!checked) return;
 
     try {
-      const userRef = doc(db, "user", firebase_uid);
+      const userRef = doc(db, "user", PID);
       await updateDoc(userRef, {
         consentGiven: true,
         consentTimestamp: serverTimestamp(),
+        firebase_uid: firebase_uid
       });
-      console.log("Consent recorded for UID:", firebase_uid);
+      console.log("Consent recorded for UID:", PID);
 
       onNext();
     } catch (err) {

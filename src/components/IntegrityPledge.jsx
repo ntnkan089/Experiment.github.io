@@ -2,23 +2,23 @@ import { useState } from "react";
 import { db } from "../config/firestore.js";
 import { doc, updateDoc, serverTimestamp } from "firebase/firestore";
 
-export default function IntegrityPledge({ onNext, onBack, firebase_uid }) {
+export default function IntegrityPledge({ onNext, onBack, PID }) {
   const [pledged, setPledged] = useState(false);
 
   const handleCheckboxChange = () => setPledged((prev) => !prev);
 
   const handleSubmit = async () => {
     try {
-      if (firebase_uid) {
-        const userRef = doc(db, "user", firebase_uid);
+      if (PID) {
+        const userRef = doc(db, "user", PID);
         await updateDoc(userRef, {
           integrityPledged: true,
           integrityTimestamp: serverTimestamp(),
         });
 
-        console.log("Integrity pledge recorded for UID:", firebase_uid);
+        console.log("Integrity pledge recorded for UID:", PID);
       } else {
-        console.log("No firebase_uid found.");
+        console.log("No PID found.");
       }
 
       alert("Thank you! You may now proceed to the Comprehension Check.");

@@ -8,7 +8,7 @@ import InstPage5 from "./inst/inst5.jsx";
 import { db, auth } from "../config/firestore.js"; // your Firestore config
 import { doc, setDoc } from "firebase/firestore";
 
-export default function Instructions({ onNext, onBack }) {
+export default function Instructions({ onNext, onBack, PID }) {
   const pages = [
     <InstPage1 />,
     <InstPage2 />,
@@ -27,7 +27,7 @@ export default function Instructions({ onNext, onBack }) {
     try {
       // Write current instruction page under participantData/{uid}/metadata
       await setDoc(
-        doc(db, "user", firebase_uid),
+        doc(db, "user", PID),
         { inst: currentPage },
         { merge: true } // merge so other metadata fields aren't overwritten
       );
