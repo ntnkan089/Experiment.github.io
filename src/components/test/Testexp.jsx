@@ -28,21 +28,12 @@ export default function TestExperiment({ PID, group, onFinish }) {
   const [phaseCorrectCount, setPhaseCorrectCount] = useState(0);
   const [totalCorrectCount, setTotalCorrectCount] = useState(0);
   const [phase1Trials, setPhase1Trials] = useState([]);
-  const [phase2Trials, setPhase2Trials] = useState([]);
 
   const [nextDisabled, setNextDisabled] = useState(false);
 
   // Select experiment structure based on group
-  const EFFECTIVE_PHASES =
-    group === "difficulty-check"
-    ? [{
-        name: "Difficulty Check",
-        trials: [...phase2Trials]
-          .slice(0, 5),
-      }]
-    : [
+  const EFFECTIVE_PHASES =[
         { name: "Phase 1", trials: phase1Trials.slice(0, 3) },
-        { name: "Phase 2", trials: phase2Trials.slice(0, 8) },
       ];
  useEffect(() => {
     trialStartRef.current = Date.now();
@@ -87,28 +78,11 @@ export default function TestExperiment({ PID, group, onFinish }) {
   // Handle time-up
  
 useEffect(() => {
-  fetch(`${url}questions.json`)
+  fetch(`${url}questions_0.json`)
     .then(r => r.json())
     .then(allTrials => {
       setPhase1Trials(allTrials.filter(t => t.phase === 1).slice(0, 40));
-      const phase2 = allTrials.filter(t => t.phase === 2).slice(0, 10);
-
-      const phase2WithAttention = [
-        ...phase2.slice(0, 5), // Q1–Q5
-        {
-          ...phase2[4],       // copy Q5
-          is_attention_check: true,
-          instruction:
-            "This is an attention check. Please select (row 3, column 4) — the lower right corner picture — to pass this attention check.",
-          correctAnswerIndex: 11, // row 3, col 4 (0-based)
-          trueClassName: "attention check",
-          trueAnswerLabel: 0,
-        },
-        ...phase2.slice(5),   // Q6+
-      ];
-
-
-      setPhase2Trials(phase2WithAttention);
+      
     });
 }, []);
 
@@ -156,7 +130,7 @@ if (
 
 
 
-if (!phase1Trials.length || !phase2Trials.length) {
+if (!phase1Trials.length) {
   return <div>Loading…</div>;
 }
 

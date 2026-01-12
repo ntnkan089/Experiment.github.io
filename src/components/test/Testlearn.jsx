@@ -35,7 +35,7 @@ useEffect(() => {
 
   /* load manifest */
   useEffect(() => {
-fetch(`${import.meta.env.BASE_URL}manifest.json`)      .then(res => res.json())
+fetch(`${import.meta.env.BASE_URL}manifest_0.json`)      .then(res => res.json())
       .then(data => setManifest(data))
   }, []);
 

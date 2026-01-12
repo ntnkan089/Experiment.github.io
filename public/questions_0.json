@@ -1,0 +1,65 @@
+[
+  {
+    "trueAnswerImage": 3098,
+    "trueAnswerLabel": 11,
+    "trueClassName": "snapdragon",
+    "selectedImages": [
+      "images/Image_Classification/big_folder/instruction_problem_images/image_03098.jpg",
+      "images/Image_Classification/big_folder/instruction_problem_images/image_03997.jpg",
+      "images/Image_Classification/big_folder/instruction_problem_images/image_05747.jpg",
+      "images/Image_Classification/big_folder/instruction_problem_images/image_06052.jpg",
+      "images/Image_Classification/big_folder/instruction_problem_images/image_06349.jpg",
+      "images/Image_Classification/big_folder/instruction_problem_images/image_06655.jpg",
+      "images/Image_Classification/big_folder/instruction_problem_images/image_03831.jpg",
+      "images/Image_Classification/big_folder/instruction_problem_images/image_04247.jpg",
+      "images/Image_Classification/big_folder/instruction_problem_images/image_06152.jpg",
+      "images/Image_Classification/big_folder/instruction_problem_images/image_04900.jpg",
+      "images/Image_Classification/big_folder/instruction_problem_images/image_00751.jpg",
+      "images/Image_Classification/big_folder/instruction_problem_images/image_00110.jpg"
+    ],
+    "correctAnswerIndex": 0,
+    "phase": 1
+  },
+  {
+    "trueAnswerImage": 3998,
+    "trueAnswerLabel": 12,
+    "trueClassName": "colt's foot",
+    "selectedImages": [
+      "images/Image_Classification/big_folder/instruction_problem_images/image_03099.jpg",
+      "images/Image_Classification/big_folder/instruction_problem_images/image_03998.jpg",
+      "images/Image_Classification/big_folder/instruction_problem_images/image_05748.jpg",
+      "images/Image_Classification/big_folder/instruction_problem_images/image_06053.jpg",
+      "images/Image_Classification/big_folder/instruction_problem_images/image_06350.jpg",
+      "images/Image_Classification/big_folder/instruction_problem_images/image_06656.jpg",
+      "images/Image_Classification/big_folder/instruction_problem_images/image_03832.jpg",
+      "images/Image_Classification/big_folder/instruction_problem_images/image_04248.jpg",
+      "images/Image_Classification/big_folder/instruction_problem_images/image_06153.jpg",
+      "images/Image_Classification/big_folder/instruction_problem_images/image_04901.jpg",
+      "images/Image_Classification/big_folder/instruction_problem_images/image_00581.jpg",
+      "images/Image_Classification/big_folder/instruction_problem_images/image_00108.jpg"
+    ],
+    "correctAnswerIndex": 1,
+    "phase": 1
+  },
+  {
+    "trueAnswerImage": 5749,
+    "trueAnswerLabel": 13,
+    "trueClassName": "king protea",
+    "selectedImages": [
+      "images/Image_Classification/big_folder/instruction_problem_images/image_03100.jpg",
+      "images/Image_Classification/big_folder/instruction_problem_images/image_03999.jpg",
+      "images/Image_Classification/big_folder/instruction_problem_images/image_05749.jpg",
+      "images/Image_Classification/big_folder/instruction_problem_images/image_06054.jpg",
+      "images/Image_Classification/big_folder/instruction_problem_images/image_06351.jpg",
+      "images/Image_Classification/big_folder/instruction_problem_images/image_06657.jpg",
+      "images/Image_Classification/big_folder/instruction_problem_images/image_03833.jpg",
+      "images/Image_Classification/big_folder/instruction_problem_images/image_04249.jpg",
+      "images/Image_Classification/big_folder/instruction_problem_images/image_06154.jpg",
+      "images/Image_Classification/big_folder/instruction_problem_images/image_04902.jpg",
+      "images/Image_Classification/big_folder/instruction_problem_images/image_00751.jpg",
+      "images/Image_Classification/big_folder/instruction_problem_images/image_00040.jpg"
+    ],
+    "correctAnswerIndex": 2,
+    "phase": 1
+  }
+]

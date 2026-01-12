@@ -1,0 +1,92 @@
+{
+  "11_snapdragon": {
+    "classLabel": "11",
+    "species": "snapdragon",
+    "images": [
+      "Image_Classification/learning_examples_instruction/11_snapdragon/image_03095.jpg",
+      "Image_Classification/learning_examples_instruction/11_snapdragon/image_03096.jpg",
+      "Image_Classification/learning_examples_instruction/11_snapdragon/image_03097.jpg"
+    ]
+  },
+  "12_colt's_foot": {
+    "classLabel": "12",
+    "species": "colt's foot",
+    "images": [
+      "Image_Classification/learning_examples_instruction/12_colt's_foot/image_03994.jpg",
+      "Image_Classification/learning_examples_instruction/12_colt's_foot/image_03995.jpg",
+      "Image_Classification/learning_examples_instruction/12_colt's_foot/image_03996.jpg"
+    ]
+  },
+  "13_king_protea": {
+    "classLabel": "13",
+    "species": "king protea",
+    "images": [
+      "Image_Classification/learning_examples_instruction/13_king_protea/image_05744.jpg",
+      "Image_Classification/learning_examples_instruction/13_king_protea/image_05745.jpg",
+      "Image_Classification/learning_examples_instruction/13_king_protea/image_05746.jpg"
+    ]
+  },
+  "14_spear_thistle": {
+    "classLabel": "14",
+    "species": "spear thistle",
+    "images": [
+      "Image_Classification/learning_examples_instruction/14_spear_thistle/image_06049.jpg",
+      "Image_Classification/learning_examples_instruction/14_spear_thistle/image_06050.jpg",
+      "Image_Classification/learning_examples_instruction/14_spear_thistle/image_06051.jpg"
+    ]
+  },
+  "15_yellow_iris": {
+    "classLabel": "15",
+    "species": "yellow iris",
+    "images": [
+      "Image_Classification/learning_examples_instruction/15_yellow_iris/image_06346.jpg",
+      "Image_Classification/learning_examples_instruction/15_yellow_iris/image_06347.jpg",
+      "Image_Classification/learning_examples_instruction/15_yellow_iris/image_06348.jpg"
+    ]
+  },
+  "16_globe-flower": {
+    "classLabel": "16",
+    "species": "globe-flower",
+    "images": [
+      "Image_Classification/learning_examples_instruction/16_globe-flower/image_06652.jpg",
+      "Image_Classification/learning_examples_instruction/16_globe-flower/image_06653.jpg",
+      "Image_Classification/learning_examples_instruction/16_globe-flower/image_06654.jpg"
+    ]
+  },
+  "17_purple_coneflower": {
+    "classLabel": "17",
+    "species": "purple coneflower",
+    "images": [
+      "Image_Classification/learning_examples_instruction/17_purple_coneflower/image_03828.jpg",
+      "Image_Classification/learning_examples_instruction/17_purple_coneflower/image_03829.jpg",
+      "Image_Classification/learning_examples_instruction/17_purple_coneflower/image_03830.jpg"
+    ]
+  },
+  "18_peruvian_lily": {
+    "classLabel": "18",
+    "species": "peruvian lily",
+    "images": [
+      "Image_Classification/learning_examples_instruction/18_peruvian_lily/image_04244.jpg",
+      "Image_Classification/learning_examples_instruction/18_peruvian_lily/image_04245.jpg",
+      "Image_Classification/learning_examples_instruction/18_peruvian_lily/image_04246.jpg"
+    ]
+  },
+  "19_balloon_flower": {
+    "classLabel": "19",
+    "species": "balloon flower",
+    "images": [
+      "Image_Classification/learning_examples_instruction/19_balloon_flower/image_06149.jpg",
+      "Image_Classification/learning_examples_instruction/19_balloon_flower/image_06150.jpg",
+      "Image_Classification/learning_examples_instruction/19_balloon_flower/image_06151.jpg"
+    ]
+  },
+  "20_giant_white_arum_lily": {
+    "classLabel": "20",
+    "species": "giant white arum lily",
+    "images": [
+      "Image_Classification/learning_examples_instruction/20_giant_white_arum_lily/image_04897.jpg",
+      "Image_Classification/learning_examples_instruction/20_giant_white_arum_lily/image_04898.jpg",
+      "Image_Classification/learning_examples_instruction/20_giant_white_arum_lily/image_04899.jpg"
+    ]
+  }
+}

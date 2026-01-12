@@ -27,7 +27,7 @@ export default function App() {
   // ==========
   const searchParams = new URLSearchParams(window.location.search);
   const groupCode = searchParams.get("g");
-
+  const qgroup = parseInt(searchParams.get("qgr")) || 0;
 const isDev =
   import.meta.env.MODE === "development"
 
@@ -197,6 +197,7 @@ return (
                 firebase_uid={firebaseUID}
                 PID={PID}
                 group={group}
+                qgroup={qgroup}
                 onFinish={() => {
                   alert("Experiment completed!");
                   setPage("complete");

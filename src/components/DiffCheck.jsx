@@ -1,53 +1,14 @@
 import { useState, useEffect, useEffectEvent, useRef } from "react";
 import { db } from "../config/firestore.js";
-import { doc, setDoc, serverTimestamp, collection, getDocs, runTransaction } from "firebase/firestore";
+import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 
 const url = import.meta.env.BASE_URL;
 
 
-async function assignBalancedProblems(allProblems, numToAssign = 10) {
-  const statsSnap = await getDocs(collection(db, "difficulty_problem_stats"));
-  const countMap = {};
-  statsSnap.forEach(d => {
-    countMap[d.id] = d.data().completedCount || 0;
-  });
-  allProblems.forEach(p => {
-    if (countMap[p.id] == null) countMap[p.id] = 0;
-  });
 
-  // Sort by least completed
-  const sorted = [...allProblems].sort((a, b) => countMap[a.id] - countMap[b.id]);
 
-  // Randomly shuffle top candidates
-  const pool = sorted.slice(0, numToAssign * 2);
-  for (let i = pool.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [pool[i], pool[j]] = [pool[j], pool[i]];
-  }
 
-  return allProblems.slice(0, numToAssign);
-}
-
-// ----------------- increment completedCount on submit -----------------
-async function incrementProblemCount(questionId) {
-  const docRef = doc(db, "difficulty_problem_stats", questionId);
-
-  try {
-    await runTransaction(db, async (transaction) => {
-      const docSnap = await transaction.get(docRef);
-      if (!docSnap.exists()) {
-        transaction.set(docRef, { completedCount: 1 });
-      } else {
-        const currentCount = docSnap.data().completedCount || 0;
-        transaction.update(docRef, { completedCount: currentCount + 1 });
-      }
-    });
-  } catch (e) {
-    console.error("Failed to increment problem count:", e);
-  }
-}
-
-export default function DifficultyCheck({ PID, group, onFinish }) {
+export default function DifficultyCheck({ PID, group, qgroup, onFinish }) {
 
   // Refs
   const trialStartRef = useRef(0);
@@ -122,15 +83,20 @@ const EFFECTIVE_PHASES = [{
   // Handle time-up
  
 useEffect(() => {
-    fetch(`${url}questions.json`)
-      .then(r => r.json())
-      .then(async allTrials => {
-        const diffTrials = allTrials;
-        const assigned = await assignBalancedProblems(diffTrials, 10);
-        const diff = [
-        ...assigned.slice(0, 5), // Q1–Q5
+  fetch(`${url}questions.json`)
+    .then(r => r.json())
+    .then(async allTrials => {
+      // Compute start/end index based on group
+      const groupSize = 10;
+      const start = qgroup * groupSize;
+      const end = start + groupSize;
+
+      const assigned = allTrials.slice(start, end);
+
+      const diff = [
+        ...assigned.slice(0, 5), // first 5 questions
         {
-          ...assigned[4],       // copy Q5
+          ...assigned[4],       // copy Q5 for attention check
           is_attention_check: true,
           instruction:
             "This is an attention check. Please select (row 3, column 4) — the lower right corner picture — to pass this attention check.",
@@ -138,11 +104,11 @@ useEffect(() => {
           trueClassName: "attention check",
           trueAnswerLabel: 0,
         },
-        ...assigned.slice(5),   // Q6+
-      ];
-        setTrials(diff);
-      });
-  }, []);
+        ...assigned.slice(5),   // remaining questions
+      ]; 
+      setTrials(diff);
+    });
+}, [qgroup]);
 
 
 const phase = EFFECTIVE_PHASES[phaseIndex];
@@ -274,9 +240,7 @@ const getRowCol = (i) => ({
       onScreenTimeRef.current += (Date.now() - lastVisibleTimeRef.current) ;
     }
     await saveTrial(correct, curCorrect, totalCorrect, timedOut);
-    if (selectedIndex !== null) {
-        await incrementProblemCount(trial.id); // <- trial.id must exist in your question array
-    }
+   
     if (correct) {
       setPhaseCorrectCount(c => c + 1);
       setTotalCorrectCount(c => c + 1);
@@ -330,7 +294,7 @@ const getRowCol = (i) => ({
   return (
     <div style={{ maxWidth: 1100, margin: "0 auto", padding: 20 }}>
       <h2 style={{ textAlign: "center", marginBottom: 20 }}>
-         Problem {trialIndex + 1}
+         {trial.trueClassName === "attention check"? "Attention Check":`Problem ${trialIndex + 1}`}
       </h2>
 
       <div style={{ display: "flex", gap: 40, alignItems: "flex-start" }}>
