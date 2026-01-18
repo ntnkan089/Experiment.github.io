@@ -21,7 +21,7 @@ export default function IntegrityPledge({ onNext, onBack, PID }) {
         console.log("No PID found.");
       }
 
-      alert("Thank you! You may now proceed to the Comprehension Check.");
+      alert("Now, you will play 2 comprehension check problems.\n\nPlease carefully read the instructions and make your choices.");
 
       onNext(); // proceed to experiment
     } catch (err) {

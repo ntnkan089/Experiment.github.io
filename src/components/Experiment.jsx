@@ -265,7 +265,7 @@ const getRowCol = (i) => ({
         return;
       }
 
-      alert("Difficulty check completed!");
+      alert("Thanks for completing the main study! Please take a moment to complete a brief survey.");
       if (onFinish) onFinish();
       return;
     }
@@ -306,7 +306,7 @@ const getRowCol = (i) => ({
             <b>Instruction:</b> {trial.instruction? trial.instruction : "Select the image that matches the target class."}
           </div>
           <div className="no-select" style={{ fontSize: 18, fontWeight: "bold" }}>
-            Target Class: <span style={{ color: "blue" }}> {trial?.trueClassName[0].toUpperCase()+trial?.trueClassName.slice(1)} {correctIndex}</span>
+            Target Class: <span style={{ color: "blue" }}> {trial?.trueClassName[0].toUpperCase()+trial?.trueClassName.slice(1)}</span>
           </div>
           <div className="no-select">
             <b>Your Selection:</b>{" "}

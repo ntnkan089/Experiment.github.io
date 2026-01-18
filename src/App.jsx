@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useEffectEvent } from "react";
 
 import Consent from "./components/consent.jsx";
 import Instructions from "./components/Instructions.jsx";
@@ -19,79 +19,131 @@ import { db } from "./config/firestore.js";
 import { doc, setDoc, serverTimestamp, getDoc } from "firebase/firestore";
 import TestExperiment from "./components/test/Testexp.jsx";
 import TestLearningPage from "./components/test/Testlearn.jsx";
+
+
+const useQueryParams = () =>
+  useMemo(() => new URLSearchParams(window.location.search), []);
+
+
 export default function App() {
+    const searchParams = useQueryParams();
+
+  const groupCode = searchParams.get("g");
+  const qgroup = Number(searchParams.get("qgr")) || 0;
+  
+
+  const isDev = import.meta.env.MODE === "development";
+
+  /* =====================================================
+     PAGE STATE
+  ===================================================== */
   const [page, setPage] = useState("consent");
 
+  /* =====================================================
+     FIREBASE AUTH
+  ===================================================== */
   const [firebaseUID, setFirebaseUID] = useState(null);
-  // GROUP MAPPING
-  // ==========
-  const searchParams = new URLSearchParams(window.location.search);
-  const groupCode = searchParams.get("g");
-  const qgroup = parseInt(searchParams.get("qgr")) || 0;
-const isDev =
-  import.meta.env.MODE === "development"
 
-const [PID] = useState(() => {
-
-  if (isDev) {
-    let pid = sessionStorage.getItem("TEST_PID");
-    if (!pid) {
-      pid = `test_${uuidv4()}`;
-      sessionStorage.setItem("TEST_PID", pid);
-    }
-    return pid;
-  } else {
-    return searchParams.get("PROLIFIC_PID") || "none";
-  }
-});
-
-  const OK = PID && PID !== "none"; // ==========
-const [isDuplicate, setIsDuplicate] = useState(false);
-useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
+  useEffect(() => {
+    const unsub = auth.onAuthStateChanged(user => {
       if (user) {
         setFirebaseUID(user.uid);
         console.log("Firebase UID:", user.uid);
       }
     });
-
-    return () => unsubscribe();
+    return unsub;
   }, []);
-  useEffect(() => {
-    if (!PID) return;
 
-    const checkDuplicate = async () => {
-      try {
-        const docRef = doc(db, "user", PID);
-        const docSnap = await getDoc(docRef);
+  /* =====================================================
+     PID STATE (PURE INIT)
+  ===================================================== */
+  const [PID, setPID] = useState(() => {
+  if (!isDev) {
+    // Production: use PROLIFIC_PID from URL or fallback
+    const pid = searchParams.get("PROLIFIC_PID");
+    return pid ? pid : "none";
+  }
 
-        if (docSnap.exists()) {
-          // Already exists → duplicate detected
-          setIsDuplicate(true);
-          console.log("Duplicate PID detected:", PID);
-        } else {
-          // First time → create record
-          await setDoc(docRef, { consentPageVisited: true, timestamp: serverTimestamp() });
-          console.log("Metadata written for new PID:", PID);
-        }
-      } catch (err) {
-        console.error("Error checking/creating PID:", err);
-      }
+  // Development: prefer PROLIFIC_PID from URL, fallback to sessionStorage
+  const urlPID = searchParams.get("PROLIFIC_PID");
+  const storedPID = sessionStorage.getItem("TEST_PID");
+  return urlPID || storedPID || null; // null means we will generate later
+});
+
+
+  /* =====================================================
+     PID GENERATION (SIDE EFFECT)
+  ===================================================== */
+
+const generatePID = useEffectEvent(() => {
+  if (PID) return; // Already exists → do nothing
+
+  const pid = `test_${uuidv4()}`;
+  sessionStorage.setItem("TEST_PID", pid);
+  setPID(pid);
+});
+
+useEffect(() => {
+  if (!isDev) return;
+
+  generatePID(); // Run safely after render
+}, [isDev]);
+
+  const OK = PID && PID !== "none";
+
+  /* =====================================================
+     DUPLICATE CHECK (FIRESTORE)
+  ===================================================== */
+  const [isDuplicate, setIsDuplicate] = useState(false);
+
+
+const checkDuplicate = useEffectEvent(async (pid) => {
+  console.log("Checking duplicate for PID:", pid);
+  if (!pid || pid === "none"|| !firebaseUID){
+    console.log(pid); 
+    return;
+  }
+
+  try {
+    const ref = doc(db, "user", pid);
+    const snap = await getDoc(ref);
+
+    if (snap.exists()) {
+      setIsDuplicate(true);
+      console.log("Duplicate PID detected:", pid);
+    } else {
+      await setDoc(ref, {
+        consentPageVisited: true,
+        timestamp: serverTimestamp(),
+      });
+      console.log("Metadata written for new PID:", pid);
+    }
+  } catch (err) {
+    console.error("PID check failed:", err);
+  }
+});
+
+useEffect(() => {
+  if (!PID) return;
+  if (!firebaseUID) return;
+
+  checkDuplicate(PID);
+}, [PID, firebaseUID]);
+
+  /* =====================================================
+     GROUP MAPPING (DERIVED)
+  ===================================================== */
+  const group = useMemo(() => {
+    const GROUP_MAP = {
+      alp: "no-ai",
+      epsi: "with-ai",
+      check: "difficulty-check",
+      test: "test",
     };
+    return GROUP_MAP[groupCode] || "no-ai";
+  }, [groupCode]);
 
-    checkDuplicate();
-  }, []);
-  const GROUP_MAP = {
-    alp: "no-ai",
-    epsi: "with-ai",
-    check: "difficulty-check",
-    test: "test"
-  };
-  const group = GROUP_MAP[groupCode] || "no-ai";
-
-  // Use 'derivedGroup' throughout your component
   console.log("Experiment group:", group);
-  
 
   // ==========
   // FIREBASE AUTH
@@ -199,7 +251,6 @@ return (
                 group={group}
                 qgroup={qgroup}
                 onFinish={() => {
-                  alert("Experiment completed!");
                   setPage("complete");
                 }}
               />
@@ -209,7 +260,6 @@ return (
                 PID={PID}
                 group={group}
                 onFinish={() => {
-                  alert("Experiment completed!");
                   setPage("complete");
                 }}
               />

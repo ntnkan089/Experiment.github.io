@@ -2,6 +2,7 @@ import { useState, useEffect, useEffectEvent, useRef } from "react";
 import { db } from "../config/firestore.js";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 
+import { shuffleArray } from "./utils/Assign.jsx";
 const url = import.meta.env.BASE_URL;
 
 
@@ -90,13 +91,14 @@ useEffect(() => {
       const groupSize = 10;
       const start = qgroup * groupSize;
       const end = start + groupSize;
-
       const assigned = allTrials.slice(start, end);
-
+      console.log("Assigned difficulty check problems:", assigned);
+      const shuffled = shuffleArray(assigned);
+      console.log("Shuffled difficulty check problems:", shuffled);
       const diff = [
-        ...assigned.slice(0, 5), // first 5 questions
+        ...shuffled.slice(0, 5), // first 5 questions
         {
-          ...assigned[4],       // copy Q5 for attention check
+          ...shuffled[4],       // copy Q5 for attention check
           is_attention_check: true,
           instruction:
             "This is an attention check. Please select (row 3, column 4) — the lower right corner picture — to pass this attention check.",
@@ -104,7 +106,7 @@ useEffect(() => {
           trueClassName: "attention check",
           trueAnswerLabel: 0,
         },
-        ...assigned.slice(5),   // remaining questions
+        ...shuffled.slice(5),   // remaining questions
       ]; 
       setTrials(diff);
     });
@@ -264,7 +266,7 @@ const getRowCol = (i) => ({
         return;
       }
 
-      alert("Difficulty check completed!");
+      alert("Thanks for completing the main study! Please take a moment to complete a brief survey.");
       if (onFinish) onFinish();
       return;
     }
@@ -306,7 +308,7 @@ const getRowCol = (i) => ({
           </div>
           {!trial.is_attention_check && 
           <div className="no-select" style={{ fontSize: 18, fontWeight: "bold" }}>
-            Target Class: <span style={{ color: "blue" }}> {trial?.trueClassName[0].toUpperCase()+trial?.trueClassName.slice(1)} {correctIndex}</span>
+            Target Class: <span style={{ color: "blue" }}> {trial?.trueClassName[0].toUpperCase()+trial?.trueClassName.slice(1)}</span>
           </div>
           }
           <div className="no-select">
@@ -387,6 +389,7 @@ const getRowCol = (i) => ({
           style={{
             width: 128,
             height: 128,
+            overflow: "hidden", 
             border: isSelected ? "3px solid blue" : "1px solid #ccc",
             backgroundColor: isCorrect ? "lightgreen" : "white",
             padding: 3,
@@ -398,7 +401,15 @@ const getRowCol = (i) => ({
           }}
         >
           <img src={img} loading="eager"
-    decoding="async" style={{ maxWidth: "100%", maxHeight: "100%" }} />
+            decoding="async"  
+            style={{ 
+              maxWidth: "100%", maxHeight: "100%" ,
+              width: "100%",
+              height: "100%",
+              objectFit: "contain",
+              display: "block", 
+            }} 
+      />
         </div>
       </>
     );

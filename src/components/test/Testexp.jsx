@@ -269,7 +269,7 @@ const getRowCol = (i) => ({
   return (
     <div style={{ maxWidth: 1100, margin: "0 auto", padding: 20 }}>
       <h2 style={{ textAlign: "center", marginBottom: 20 }}>
-        {phase.name} — Test Problem {trialIndex + 1}
+        Problem {trialIndex + 1}
       </h2>
 
       <div style={{ display: "flex", gap: 40, alignItems: "flex-start" }}>
@@ -280,7 +280,7 @@ const getRowCol = (i) => ({
             <b>Instruction:</b> {trial.instruction? trial.instruction : "Select the image that matches the target class."}
           </div>
           <div className="no-select" style={{ fontSize: 18, fontWeight: "bold" }}>
-            Target Class: <span style={{ color: "blue" }}> {trial?.trueClassName[0].toUpperCase()+trial?.trueClassName.slice(1)} {correctIndex}</span>
+            Target Class: <span style={{ color: "blue" }}> {trial?.trueClassName[0].toUpperCase()+trial?.trueClassName.slice(1)} </span>
           </div>
           <div className="no-select">
             <b>Your Selection:</b>{" "}
