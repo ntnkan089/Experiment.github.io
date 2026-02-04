@@ -7,7 +7,7 @@ const url = import.meta.env.BASE_URL;
 
 export default function TestLearningPage({ onNext, PID }) {
   const [manifest, setManifest] = useState(null);
-  const [timeLeft, setTimeLeft] = useState(5 * 3);
+  const [timeLeft, setTimeLeft] = useState(5 * 30);
   const timerRef = useRef(null);
 const onScreenTimeRef = useRef(0);     // milliseconds
 const lastVisibleTimeRef = useRef(0);

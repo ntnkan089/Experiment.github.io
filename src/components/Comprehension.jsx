@@ -47,7 +47,7 @@ export default function ComprehensionCheck({ onComplete, onFail }) {
         setKey(k => k + 1);
         setShowCorrect(false);
       } else {
-        alert("Great job! You’ve passed the comprehension check. You now have 5 minutes for the learning phase. Click OK to begin.");
+        alert("Great job! You’ve passed the comprehension check. You now have 5 minutes for the learning phase.");
         onComplete();
       }
     } else {
@@ -57,7 +57,7 @@ export default function ComprehensionCheck({ onComplete, onFail }) {
         setAttempt(2);
       } else {
         // Wrong on second attempt → end study
-        alert("You did not pass this comprehension check after two attempts. Study ends.");
+        alert("You did not pass this comprehension check after two attempts. Study ends. Please return your submission by closing this study and clicking “Stop Without Completing” on Prolific.");
         onFail();
       }
     }

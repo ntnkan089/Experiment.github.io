@@ -77,11 +77,20 @@ export default function Consent({ onNext, firebase_uid, PID }) {
         <h4><b>User Study on Human Learning and Reliance on Artificial Intelligence</b></h4>
 
         <h4><b>Project Summary</b></h4>
-        <p>TODO</p>
+        <p>
+          This experiment explores how people learn and remember unfamiliar flower species under a time limit.
+          In the first phase, you will study a set of flower images along with their names and try to memorize them
+          as accurately as possible. In the second phase, you will complete a series of tests in which you match
+          each flower image to the correct label based on what you learned in the first phase.
+        </p>
+        <p>
+          Your goal is to identify the correct flower image for each test within the given time limit and as
+          accurately as possible.
+        </p>
 
         <h4><b>Time Commitment</b></h4>
         <p>
-          This study typically takes less than <b>50 minutes</b> to complete.
+          This study typically takes less than <b>20 minutes</b> to complete.
         </p>
 
         <h4><b>Benefits & Risks</b></h4>
@@ -100,8 +109,7 @@ export default function Consent({ onNext, firebase_uid, PID }) {
 
         <h4><b>Reimbursement & Compensation</b></h4>
         <p>
-          You will receive <b>$TODO USD</b> for your participation via Prolific.<br />
-          If your performance is excellent, you will receive up to an additional <b>$TODO USD</b>.<br /><br />
+          You will receive <b>$4.00 USD</b> for your participation via Prolific.<br /><br />
           <b>Note:</b> If your performance is below a minimal threshold for quality, 
           you will not be compensated. This study includes comprehension and attention checks 
           to ensure participants complete the tasks honestly and thoroughly. 

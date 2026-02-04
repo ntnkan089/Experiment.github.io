@@ -1,11 +1,11 @@
-import img2 from './inst_i/image_2.png';
+import img0 from './inst_i/image_0.png';
 
-export default function InstPage2() {
+export default function InstPage8() {
   return (
     <div style={{ textAlign: "center" }}>
       <img 
-        src= {img2}
-        alt="Instruction image 2" 
+        src= {img0}
+        alt="Instruction image" 
         style={{ maxWidth: "100%", height: "auto" }} 
       />
     </div>

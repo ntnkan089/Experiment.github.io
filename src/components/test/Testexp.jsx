@@ -24,7 +24,7 @@ export default function TestExperiment({ PID, group, onFinish }) {
   const [selectedIndex, setSelectedIndex] = useState(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [feedback, setFeedback] = useState(null);
-  const [timeLeft, setTimeLeft] = useState(30);
+  const [timeLeft, setTimeLeft] = useState(32);
   const [phaseCorrectCount, setPhaseCorrectCount] = useState(0);
   const [totalCorrectCount, setTotalCorrectCount] = useState(0);
   const [phase1Trials, setPhase1Trials] = useState([]);
@@ -224,7 +224,7 @@ const getRowCol = (i) => ({
     setSelectedIndex(null);
     setIsSubmitted(false);
     setFeedback(null);
-    setTimeLeft(30);
+    setTimeLeft(32);
 
     if (trialIndex + 1 < phase.trials.length) {
       setTrialKey(k => k + 1);
