@@ -19,7 +19,6 @@ export default function InstPage1() {
         <b>Warning:</b> If you use Safari, image sizes may not display correctly. If you believe there is an issue with any problem, note the problem ID and message us via Prolific after completing the study.
       </p>
 
-      <img src="/images/flo.webp" alt="Flower example" style={{ maxWidth: "100%", marginTop: 10 }} />
     </div>
   );
 }

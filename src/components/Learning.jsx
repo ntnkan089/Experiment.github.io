@@ -9,34 +9,46 @@ export default function LearningPage({ onNext, PID }) {
   const [manifest, setManifest] = useState(null);
   const [timeLeft, setTimeLeft] = useState(5 * 3);
   const timerRef = useRef(null);
-const onScreenTimeRef = useRef(0);     // milliseconds
-const lastVisibleTimeRef = useRef(0);
-const pageVisibleRef = useRef(true);
+  const onScreenTimeRef = useRef(0);     // milliseconds
+  const lastVisibleTimeRef = useRef(0);
+  const pageVisibleRef = useRef(true);
+  const timeExpiredRef = useRef(false);
+
 useEffect(() => {
    
     onScreenTimeRef.current = 0;
     lastVisibleTimeRef.current = Date.now();
     pageVisibleRef.current = true;
-  const handleVisibilityChange = () => {
-    const now = Date.now();
+    const handleVisibilityChange = () => {
+      const now = Date.now();
 
-    if (pageVisibleRef.current) {
-      onScreenTimeRef.current += now - lastVisibleTimeRef.current;
-    }
+      // finalize previous visible segment
+      if (pageVisibleRef.current) {
+        onScreenTimeRef.current += now - lastVisibleTimeRef.current;
+      }
 
-    pageVisibleRef.current = !document.hidden;
-    lastVisibleTimeRef.current = now;
-  };
+      pageVisibleRef.current = !document.hidden;
+      lastVisibleTimeRef.current = now;
+
+      // 🔔 if user just came back AND time already expired
+      if (!document.hidden && timeExpiredRef.current) {
+        timeExpiredRef.current = false;
+        alert("Time is up! Proceeding to experiment.");
+        onNext?.();
+      }
+    };
 
   document.addEventListener("visibilitychange", handleVisibilityChange);
   return () =>
     document.removeEventListener("visibilitychange", handleVisibilityChange);
-}, []);
+
+}, [onNext]);
 
   /* load manifest */
   useEffect(() => {
-fetch(`${import.meta.env.BASE_URL}manifest.json`)      .then(res => res.json())
-      .then(data => setManifest(data))
+    fetch(`${import.meta.env.BASE_URL}manifest.json`)      
+          .then(res => res.json())
+          .then(data => setManifest(data))
   }, []);
 
   /* timer */
@@ -48,48 +60,50 @@ fetch(`${import.meta.env.BASE_URL}manifest.json`)      .then(res => res.json())
   }, []);
 
 
-const hasSavedRef = useRef(false);
+  const hasSavedRef = useRef(false);
 
-useEffect(() => {
-  const updateLearningOnScreenTime = async (onScreenTimeMs) => {
-    if (!PID) return;
+  useEffect(() => {
+    const updateLearningOnScreenTime = async (onScreenTimeMs) => {
+      if (!PID) return;
 
-    try {
-      await setDoc(
-        doc(db, "user", PID),
-        {
-          learning: {
-            on_screen_time_ms: onScreenTimeMs,
-            expected_ms: 300000,
-            timestamp: Date.now(),
+      try {
+        await setDoc(
+          doc(db, "user", PID),
+          {
+            learning: {
+              on_screen_time_ms: onScreenTimeMs,
+              expected_ms: 300000,
+              timestamp: Date.now(),
+            },
           },
-        },
-        { merge: true }
-      );
-    } catch (err) {
-      console.error("Failed to update learning on-screen time:", err);
-    }
+          { merge: true }
+        );
+      } catch (err) {
+        console.error("Failed to update learning on-screen time:", err);
+      }
 
-  };
-  if (timeLeft <= 0 && !hasSavedRef.current) {
+    };
+    if (timeLeft > 0 || hasSavedRef.current) return;
+
     hasSavedRef.current = true;
+    timeExpiredRef.current = true;
 
     const now = Date.now();
-
     if (pageVisibleRef.current) {
       onScreenTimeRef.current += now - lastVisibleTimeRef.current;
     }
 
     const onScreenTimeMs = onScreenTimeRef.current;
-
-    console.log("Learning on-screen time (ms):", onScreenTimeMs);
-
     updateLearningOnScreenTime(onScreenTimeMs);
 
-    alert("Time is up! Proceeding to experiment.");
-    onNext?.();
-  }
-}, [timeLeft, onNext, PID]);
+    // 🔔 if still visible, trigger immediately
+    if (!document.hidden) {
+      timeExpiredRef.current = false;
+      alert("Time is up! Proceeding to experiment.");
+      onNext?.();
+    }
+  }, [timeLeft, PID, onNext]);
+
 
 
   const formatTime = sec =>

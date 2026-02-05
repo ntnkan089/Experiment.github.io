@@ -1,13 +1,18 @@
 // components/Complete.jsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { db, auth } from "../config/firestore.js";
-import { doc, updateDoc, serverTimestamp, getDoc } from "firebase/firestore";
+import {
+  doc,
+  updateDoc,
+  serverTimestamp,
+  getDoc,
+} from "firebase/firestore";
 
 export default function Complete({PID}) {
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [bonusAmount, setBonusAmount] = useState(null);
-
+  const [redirectUrl, setRedirectUrl] = useState(null);
   // Likert scale
   const scale = [
     "Strongly Disagree",
@@ -97,11 +102,55 @@ const REQUIRED_FIELDS = [
       setLoading(false);
     }
   };
+  
+  useEffect(() => {
+    const checkAttentionPass = async (PID) => {
+          try {
+        const attentionRef = doc(
+          db,
+          "user",
+          PID,
+          "experiment",
+          "trial",
+          "attention-check"
+        );
+
+        const snap = await getDoc(attentionRef);
+
+        // If attention check exists and performance is 0 → fail
+        if (snap.exists() && snap.data()?.performance === 0) {
+          return false;
+        }
+
+        // Passed attention check (or does not exist)
+        return true;
+      } catch (err) {
+        console.error("Error checking attention:", err);
+        // Optional: fail participant on DB error
+        return false;
+      }
+    };
+    const decideRedirect = async () => {
+      try {
+        const passed = await checkAttentionPass(PID);
+
+        const PASS_URL =
+          "https://app.prolific.com/submissions/complete?cc=CYBWJG0E";
+        const FAIL_URL =
+          "https://app.prolific.com/submissions/complete?cc=C1I443S2";
+
+        setRedirectUrl(passed ? PASS_URL : FAIL_URL);
+      } catch (e) {
+        console.error("Attention check failed:", e);
+      }
+    };
+
+    decideRedirect();
+  }, [PID]);
 
   const redirectToProlific = () => {
-    const PROLIFIC_REDIRECT =
-      "https://app.prolific.co/submissions/complete?cc=UNIQUECODE";
-    window.location.replace(PROLIFIC_REDIRECT);
+    if (!redirectUrl) return;
+    window.location.replace(redirectUrl);
   };
 
   const sectionStyle = { marginBottom: 30 };

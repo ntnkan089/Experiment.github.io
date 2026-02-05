@@ -115,6 +115,7 @@ const checkDuplicate = useEffectEvent(async (pid) => {
       await setDoc(ref, {
         consentPageVisited: true,
         timestamp: serverTimestamp(),
+        group: groupCode || "undefined",
       });
       console.log("Metadata written for new PID:", pid);
     }
