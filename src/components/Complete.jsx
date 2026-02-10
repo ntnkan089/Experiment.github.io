@@ -111,12 +111,16 @@ const REQUIRED_FIELDS = [
           "user",
           PID,
           "experiment",
+          "Difficulty Check",
           "trial",
           "attention-check"
         );
 
         const snap = await getDoc(attentionRef);
 
+      console.log("Attention check snapshot:", snap);
+      console.log("Exists:", snap.exists());
+      console.log("Data:", snap.exists() ? snap.data() : null);
         // If attention check exists and performance is 0 → fail
         if (snap.exists() && snap.data()?.performance === 0) {
           return false;

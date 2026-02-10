@@ -1,6 +1,9 @@
 import { useState } from "react";
+import { db } from "../config/firestore.js";
+import { doc, updateDoc, serverTimestamp } from "firebase/firestore";
 
 const url = import.meta.env.BASE_URL;
+
 
 const CHECKS = [
   {
@@ -17,7 +20,7 @@ const CHECKS = [
   },
 ];
 
-export default function ComprehensionCheck({ onComplete, onFail }) {
+export default function ComprehensionCheck({ onComplete, onFail, PID }) {
   const [checkIndex, setCheckIndex] = useState(0);
   const [attempt, setAttempt] = useState(1);
   const [selectedIndex, setSelectedIndex] = useState(null);
@@ -35,33 +38,48 @@ export default function ComprehensionCheck({ onComplete, onFail }) {
 
   const handleSelect = (i) => setSelectedIndex(i);
 
-  const handleSubmit = () => {
-    if (selectedIndex === null) return;
+  const handleSubmit = async () => {
+  if (selectedIndex === null) return;
 
-    if (selectedIndex === correctIndex) {
-      // Correct selection
-      if (checkIndex + 1 < CHECKS.length) {
-        setCheckIndex(checkIndex + 1);
-        setAttempt(1);
-        setSelectedIndex(null);
-        setKey(k => k + 1);
-        setShowCorrect(false);
-      } else {
-        alert("Great job! You’ve passed the comprehension check. You now have 5 minutes for the learning phase.");
-        onComplete();
-      }
-    } else {
-      if (attempt === 1) {
-        // Wrong on first attempt → show correct image
-        setShowCorrect(true);
-        setAttempt(2);
-      } else {
-        // Wrong on second attempt → end study
-        alert("You did not pass this comprehension check after two attempts. Study ends. Please return your submission by closing this study and clicking “Stop Without Completing” on Prolific.");
-        onFail();
-      }
+  const updateComprehensionStatus = async (pass) => {
+    try {
+      await updateDoc(doc(db, "user", PID), {
+        pass_comprehension: pass,
+        finish_comprehension: pass,
+        timestamp: serverTimestamp(),
+      });
+    } catch (err) {
+      console.error("Failed to update comprehension status:", err);
     }
   };
+
+  if (selectedIndex === correctIndex) {
+    // Correct selection
+    if (checkIndex + 1 < CHECKS.length) {
+      setCheckIndex(checkIndex + 1);
+      setAttempt(1);
+      setSelectedIndex(null);
+      setKey(k => k + 1);
+      setShowCorrect(false);
+    } else {
+      // Passed all comprehension checks
+      await updateComprehensionStatus(true);  // <-- ADD THIS
+      alert("Great job! You have passed the comprehension check. You now have 5 minutes for the learning phase.");
+      onComplete();
+    }
+  } else {
+    if (attempt === 1) {
+      // Wrong on first attempt → show correct image
+      setShowCorrect(true);
+      setAttempt(2);
+    } else {
+      // Wrong on second attempt → end study
+      await updateComprehensionStatus(false);  // <-- ADD THIS
+      alert("You did not pass this comprehension check after two attempts. Study ends. Please return your submission by closing this study and clicking “Stop Without Completing” on Prolific.");
+      onFail();
+    }
+  }
+};
 
   const handleRetry = () => {
     // Clear selection and correct highlight for reattempt

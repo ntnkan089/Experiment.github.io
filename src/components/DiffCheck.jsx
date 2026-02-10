@@ -173,7 +173,7 @@ const getRowCol = (i) => ({
 
   // Reset trial
  
-  
+
   // Save trial
   const saveTrial = async (correct, curCorrect, totalCorrect, timedOut) => {
     if (!PID) return;
@@ -182,6 +182,7 @@ const getRowCol = (i) => ({
     const totalTimeUsed = (Date.now() - trialStartRef.current) ;
 
     const data = {
+      problem_id: trial.is_attention_check?100:trial.problem_id,
       timed_out: timedOut,
       trial_id: trialIndex,
       phase: phase.name,
@@ -252,7 +253,7 @@ const getRowCol = (i) => ({
     setSelectedIndex(null);
     setIsSubmitted(false);
     setFeedback(null);
-    setTimeLeft(30);
+    setTimeLeft(31);
 
     if (trialIndex + 1 < phase.trials.length) {
       setTrialKey(k => k + 1);

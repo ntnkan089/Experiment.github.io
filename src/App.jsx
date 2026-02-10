@@ -116,6 +116,10 @@ const checkDuplicate = useEffectEvent(async (pid) => {
         consentPageVisited: true,
         timestamp: serverTimestamp(),
         group: groupCode || "undefined",
+        qgr: qgroup,
+        pass_comprehension: false,
+        finish_comprehension: false,
+        PID: pid,
       });
       console.log("Metadata written for new PID:", pid);
     }
@@ -220,10 +224,11 @@ return (
           {page === "comprehension" && (
             <ComprehensionCheck
               group={group}
+              PID={PID}
               onComplete={() => setPage("learning")}
               onFail={() =>
                 (window.location.href =
-                  "https://app.prolific.co/submissions/complete?cc=XXXX")
+                  "https://app.prolific.com/submissions/complete?cc=C1I443S2")
               }
             />
           )}

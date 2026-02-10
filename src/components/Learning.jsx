@@ -53,11 +53,54 @@ useEffect(() => {
 
   /* timer */
   useEffect(() => {
-    timerRef.current = setInterval(() => {
-      setTimeLeft(t => t - 1);
-    }, 1000);
+    const totalDurationMs = 5 * 60 * 1000; // 15 seconds demo; replace with real duration
+    const startTime = Date.now();
+
+    const tick = () => {
+      const elapsed = Date.now() - startTime;
+      const remainingSec = Math.max(Math.ceil((totalDurationMs - elapsed) / 1000), 0);
+      setTimeLeft(remainingSec);
+
+      // if time is up
+      if (remainingSec <= 0) {
+        clearInterval(timerRef.current);
+        timeExpiredRef.current = true;
+
+        // account for on-screen time
+        const now = Date.now();
+        if (pageVisibleRef.current) {
+          onScreenTimeRef.current += now - lastVisibleTimeRef.current;
+        }
+
+        // save to Firestore
+        if (PID) {
+          setDoc(
+            doc(db, "user", PID),
+            {
+              learning: {
+                on_screen_time_ms: onScreenTimeRef.current,
+                expected_ms: totalDurationMs,
+                timestamp: Date.now(),
+              },
+            },
+            { merge: true }
+          ).catch(err => console.error(err));
+        }
+
+        // alert and go to next
+        if (!document.hidden) {
+          timeExpiredRef.current = false;
+          alert("Time is up! Proceeding to experiment.");
+          onNext?.();
+        }
+      }
+    };
+
+    tick(); // initial call
+    timerRef.current = setInterval(tick, 500); // check every 0.5s
+
     return () => clearInterval(timerRef.current);
-  }, []);
+  }, [PID, onNext]);
 
 
   const hasSavedRef = useRef(false);
