@@ -253,7 +253,7 @@ const getRowCol = (i) => ({
     setSelectedIndex(null);
     setIsSubmitted(false);
     setFeedback(null);
-    setTimeLeft(31);
+    setTimeLeft(30);
 
     if (trialIndex + 1 < phase.trials.length) {
       setTrialKey(k => k + 1);

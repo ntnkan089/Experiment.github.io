@@ -19,7 +19,7 @@ import { db } from "./config/firestore.js";
 import { doc, setDoc, serverTimestamp, getDoc } from "firebase/firestore";
 import TestExperiment from "./components/test/Testexp.jsx";
 import TestLearningPage from "./components/test/Testlearn.jsx";
-
+import CompNo from "./components/CompNo.jsx";
 
 const useQueryParams = () =>
   useMemo(() => new URLSearchParams(window.location.search), []);
@@ -227,10 +227,13 @@ return (
               PID={PID}
               onComplete={() => setPage("learning")}
               onFail={() =>
-                (window.location.href =
-                  "https://app.prolific.com/submissions/complete?cc=C1I443S2")
+                setPage("fail")
               }
             />
+          )}
+          {page === "fail" && (
+            <CompNo open={true} />
+            
           )}
 
           {page === "learning" && (
