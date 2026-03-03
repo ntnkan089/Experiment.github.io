@@ -281,8 +281,10 @@ const REQUIRED_FIELDS = [
             marginTop: 20,
             marginBottom: 40,
             padding: 15,
-            background: "#eef6ff",
+            background: "var(--color-bg)",
+            border: "1px solid var(--color-accent)",
             borderRadius: 8,
+            color: "var(--color-text)",
           }}
         >
           <p style={{ margin: 0, fontSize: 16 }}>

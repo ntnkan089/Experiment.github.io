@@ -304,8 +304,8 @@ export default function DifficultyCheck({ PID, group, qgroup, onFinish }) {
         {/* LEFT PANEL */}
         <div style={{ width: "35%", display: "flex", flexDirection: "column", gap: 15 }}>
           <div className="no-select" style={{ fontSize: 20, fontWeight: "bold" }}>Time Remaining: {timeLeft}s</div>
-          <div className="no-select" style={{ background: "#f2f2f2", padding: 10, borderRadius: 8 }}>
-            <b>Instruction:</b> {trial.instruction ? trial.instruction : "Select the image that matches the target class."}
+          <div className="no-select" style={{ padding: 10, borderRadius: 8 }}>
+            <b style={{ textDecoration: "underline" }}>Instruction:</b> {trial.instruction ? trial.instruction : "Select the image that matches the target class."}
           </div>
           {!trial.is_attention_check &&
             <div className="no-select" style={{ fontSize: 18, fontWeight: "bold" }}>

@@ -164,6 +164,7 @@ useEffect(() => {
     minHeight: "100vh",
   };
 
+  
   const containerStyle = {
     flex: 1,
     display: "flex",
@@ -172,7 +173,9 @@ useEffect(() => {
     alignItems: "center",
     textAlign: "center",
     padding: "20px",
-    backgroundColor: "#f9f9f9",
+    
+    backgroundColor: "var(--color-bg)", 
+    color: "var(--color-text)",          
   };
 
   // ==========

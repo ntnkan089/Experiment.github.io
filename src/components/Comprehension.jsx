@@ -99,8 +99,8 @@ export default function ComprehensionCheck({ onComplete, onFail, PID }) {
       <div style={{ display: "flex", gap: 40, alignItems: "flex-start" }}>
         {/* LEFT PANEL */}
         <div className="no-select" style={{ width: "35%", display: "flex", flexDirection: "column", gap: 15 }}>
-          <div style={{ background: "#f2f2f2", padding: 10, borderRadius: 8 }}>
-            <b>Instruction:</b> Select the image that matches the target class.
+          <div style={{  padding: 10, borderRadius: 8 }}>
+            <b style={{ textDecoration: "underline" }}>Instruction:</b> Select the image that matches the target class.
           </div>
           <div style={{ fontSize: 18, fontWeight: "bold" }}>
             Target Class: <span style={{ color: "blue" }}>{currentCheck.target}</span>

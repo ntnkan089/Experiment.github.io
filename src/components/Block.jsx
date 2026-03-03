@@ -51,7 +51,8 @@ const overlayStyle = {
   left: 0,
   width: "100vw",
   height: "100vh",
-  backgroundColor: "rgba(0, 0, 0, 0.6)",
+  backgroundColor: "var(--color-bg)", 
+  color: "var(--color-text)",  
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
@@ -59,7 +60,7 @@ const overlayStyle = {
 };
 
 const modalStyle = {
-  backgroundColor: "#ffffff",
+  backgroundColor: "var(--color-bg)",
   padding: "30px",
   borderRadius: "8px",
   maxWidth: "500px",
