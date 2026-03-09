@@ -368,7 +368,9 @@ export default function DifficultyCheck({ PID, group, qgroup, onFinish }) {
             {images.map((img, i) => {
               const row = Math.floor(i / columns) + 1;
               const isSelected = selectedIndex === i;
-              const isCorrect = isSubmitted && i === correctIndex;
+              const isCorrect = isSubmitted && i === correctIndex;              
+              const isWrongSelection =
+                isSubmitted && selectedIndex === i && selectedIndex !== correctIndex;
 
               return (
                 <>
@@ -392,7 +394,8 @@ export default function DifficultyCheck({ PID, group, qgroup, onFinish }) {
                       height: 128,
                       overflow: "hidden",
                       border: isSelected ? "3px solid blue" : "1px solid #ccc",
-                      backgroundColor: isCorrect ? "lightgreen" : "white",
+                      backgroundColor: isCorrect? "lightgreen": isWrongSelection? "#ff9999"
+: "white",
                       padding: 3,
                       cursor: isSubmitted ? "default" : "pointer",
                       display: "flex",

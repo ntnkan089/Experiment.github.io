@@ -53,7 +53,7 @@ useEffect(() => {
 
   /* timer */
   useEffect(() => {
-    const totalDurationMs = 5 * 60 * 1000; // 15 seconds demo; replace with real duration
+    const totalDurationMs = 3 * 60 * 1000; // 15 seconds demo; replace with real duration
     const startTime = Date.now();
 
     const tick = () => {
@@ -115,7 +115,7 @@ useEffect(() => {
           {
             learning: {
               on_screen_time_ms: onScreenTimeMs,
-              expected_ms: 300000,
+              expected_ms: 180000,
               timestamp: Date.now(),
             },
           },
@@ -162,7 +162,11 @@ useEffect(() => {
 
       <div style={{ textAlign: "center", fontSize: 18}}>
         Review each flower class and its example images.
+      <div style={{ textAlign: "center", fontSize: 18, marginTop: 10, marginBottom: 10 }}>
+        You may find it helpful to focus on visual features such as the flower’s <b style={{color: "red"}}>shape, color, buds, and leaf shape</b> when distinguishing between classes.
+
         
+      </div> 
       </div>
       <div style={{ textAlign: "center", fontSize: 18, marginBottom: 10 }}>
         <b>Note:</b> The displayed examples represent only a subset of the species and are not exhaustive.
