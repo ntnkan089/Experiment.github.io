@@ -24,7 +24,7 @@ export default function TestExperiment({ PID, group, onFinish }) {
   const [selectedIndex, setSelectedIndex] = useState(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [feedback, setFeedback] = useState(null);
-  const [timeLeft, setTimeLeft] = useState(32);
+  const [timeLeft, setTimeLeft] = useState(30);
   const [phaseCorrectCount, setPhaseCorrectCount] = useState(0);
   const [totalCorrectCount, setTotalCorrectCount] = useState(0);
   const [phase1Trials, setPhase1Trials] = useState([]);
@@ -224,7 +224,7 @@ const getRowCol = (i) => ({
     setSelectedIndex(null);
     setIsSubmitted(false);
     setFeedback(null);
-    setTimeLeft(32);
+    setTimeLeft(30);
 
     if (trialIndex + 1 < phase.trials.length) {
       setTrialKey(k => k + 1);
@@ -269,7 +269,7 @@ const getRowCol = (i) => ({
   return (
     <div style={{ maxWidth: 1100, margin: "0 auto", padding: 20 }}>
       <h2 style={{ textAlign: "center", marginBottom: 20 }}>
-        Problem {trialIndex + 1}
+        Problem {trialIndex + 1} of {phase.trials.length}
       </h2>
 
       <div style={{ display: "flex", gap: 40, alignItems: "flex-start" }}>
@@ -339,7 +339,8 @@ const getRowCol = (i) => ({
     const row = Math.floor(i / columns) + 1;
     const isSelected = selectedIndex === i;
     const isCorrect = isSubmitted && i === correctIndex;
-
+    const isWrongSelection =
+                isSubmitted && selectedIndex === i && selectedIndex !== correctIndex;
     return (
       <>
         {/* Row label only at row start */}
@@ -361,7 +362,7 @@ const getRowCol = (i) => ({
             width: 128,
             height: 128,
             border: isSelected ? "3px solid blue" : "1px solid #ccc",
-            backgroundColor: isCorrect ? "lightgreen" : "white",
+            backgroundColor: isCorrect? "lightgreen": isWrongSelection? "#ff9999": "white",
             padding: 3,
             cursor: isSubmitted ? "default" : "pointer",
             display: "flex",

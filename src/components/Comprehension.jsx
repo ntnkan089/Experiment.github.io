@@ -64,7 +64,7 @@ export default function ComprehensionCheck({ onComplete, onFail, PID }) {
     } else {
       // Passed all comprehension checks
       await updateComprehensionStatus(true);  // <-- ADD THIS
-      alert("Great job! You have passed the comprehension check. You now have 5 minutes for the learning phase.");
+      alert("Great job! You have passed the comprehension check. You now have 3 minutes for the learning phase.");
       onComplete();
     }
   } else {

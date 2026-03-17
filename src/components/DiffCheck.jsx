@@ -297,7 +297,7 @@ export default function DifficultyCheck({ PID, group, qgroup, onFinish }) {
   return (
     <div style={{ maxWidth: 1100, margin: "0 auto", padding: 20 }}>
       <h2 style={{ textAlign: "center", marginBottom: 20 }}>
-        {trial.trueClassName === "attention check" ? "Attention Check" : `Problem ${trialIndex + 1}`}
+        {trial.trueClassName === "attention check" ? "Attention Check" : `Problem ${trialIndex + 1} of ${phase.trials.length}`} 
       </h2>
 
       <div style={{ display: "flex", gap: 40, alignItems: "flex-start" }}>

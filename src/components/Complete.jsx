@@ -167,16 +167,16 @@ const REQUIRED_FIELDS = [
 
       <hr style={{ margin: "20px 0" }} />
 
-      {/* -------------------- GAME EXPERIENCE QUESTIONS -------------------- */}
-      <h3>Game Experience</h3>
+      {/* -------------------- TASK EXPERIENCE QUESTIONS -------------------- */}
+      <h3>Task Experience</h3>
 
       <div style={sectionStyle}>
         {[
-          { key: "challenging", text: "The game was challenging." },
-          { key: "boring", text: "I found the game to be boring." },
+          { key: "challenging", text: "The task was challenging." },
+          { key: "boring", text: "I found the task to be boring." },
           {
             key: "confident",
-            text: "I felt confident in my performance throughout the game.",
+            text: "I felt confident in my performance throughout the task.",
           },
           {
             key: "effort",
@@ -184,7 +184,7 @@ const REQUIRED_FIELDS = [
           },
           {
             key: "strategy",
-            text: "I developed a strategy to improve during the game.",
+            text: "I developed a strategy to improve during the task.",
           },
           {
             key: "seeing_correct_helped",
@@ -291,8 +291,7 @@ const REQUIRED_FIELDS = [
             <strong>Thanks for participating!</strong>
           </p>
           <p style={{ marginTop: 6 }}>
-            Your bonus payment is <strong>${bonusAmount}</strong> and will be
-            distributed shortly.
+            Your compensation will be distributed shortly.
           </p>
         </div>
       )}
