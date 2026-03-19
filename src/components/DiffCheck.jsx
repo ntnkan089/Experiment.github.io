@@ -3,6 +3,7 @@ import { db } from "../config/firestore.js";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 
 import { shuffleArray } from "./utils/Assign.jsx";
+import InfoOverlay from "./InfoOverlay.jsx";
 const url = import.meta.env.BASE_URL;
 
 
@@ -34,6 +35,7 @@ export default function DifficultyCheck({ PID, group, qgroup, onFinish }) {
   const [trials, setTrials] = useState([]);
 
   const [nextDisabled, setNextDisabled] = useState(false);
+  const [overlay, setOverlay] = useState(null); // { message, onOk }
 
   // Select experiment structure based on group
   const EFFECTIVE_PHASES = [{
@@ -267,8 +269,10 @@ export default function DifficultyCheck({ PID, group, qgroup, onFinish }) {
         return;
       }
 
-      alert("Thanks for completing the main study! Please take a moment to complete a brief survey.");
-      if (onFinish) onFinish();
+      setOverlay({
+        message: "Thanks for completing the main study! Please take a moment to complete a brief survey.",
+        onOk: () => { setOverlay(null); if (onFinish) onFinish(); },
+      });
       return;
     }
 
@@ -282,8 +286,10 @@ export default function DifficultyCheck({ PID, group, qgroup, onFinish }) {
       return;
     }
 
-    alert("Thanks for completing the main study! Please take a moment to complete a brief survey.");
-    if (onFinish) onFinish();
+    setOverlay({
+      message: "Thanks for completing the main study! Please take a moment to complete a brief survey.",
+      onOk: () => { setOverlay(null); if (onFinish) onFinish(); },
+    });
   };
 
   // Styles
@@ -293,6 +299,10 @@ export default function DifficultyCheck({ PID, group, qgroup, onFinish }) {
 
   const selectedRowCol = selectedIndex !== null ? getRowCol(selectedIndex) : null;
   const correctRowCol = getRowCol(correctIndex);
+
+  if (overlay) {
+    return <InfoOverlay message={overlay.message} onOk={overlay.onOk} />;
+  }
 
   return (
     <div style={{ maxWidth: 1100, margin: "0 auto", padding: 20 }}>

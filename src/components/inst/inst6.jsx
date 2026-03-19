@@ -1,4 +1,4 @@
-import img6 from './inst_i/image_6.png';
+import img6 from './inst_i/image_82_0.png';
 
 export default function InstPage6() {
   return (

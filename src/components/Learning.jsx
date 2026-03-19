@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { db } from "../config/firestore.js";
 import { doc, setDoc } from "firebase/firestore";
+import InfoOverlay from "./InfoOverlay.jsx";
 
 const url = import.meta.env.BASE_URL;
 
@@ -8,6 +9,7 @@ const url = import.meta.env.BASE_URL;
 export default function LearningPage({ onNext, PID }) {
   const [manifest, setManifest] = useState(null);
   const [timeLeft, setTimeLeft] = useState(5 * 3);
+  const [showTimeUp, setShowTimeUp] = useState(false);
   const timerRef = useRef(null);
   const onScreenTimeRef = useRef(0);     // milliseconds
   const lastVisibleTimeRef = useRef(0);
@@ -33,8 +35,7 @@ useEffect(() => {
       // 🔔 if user just came back AND time already expired
       if (!document.hidden && timeExpiredRef.current) {
         timeExpiredRef.current = false;
-        alert("Time is up! Proceeding to experiment.");
-        onNext?.();
+        setShowTimeUp(true);
       }
     };
 
@@ -87,11 +88,10 @@ useEffect(() => {
           ).catch(err => console.error(err));
         }
 
-        // alert and go to next
+        // show overlay and go to next on OK
         if (!document.hidden) {
           timeExpiredRef.current = false;
-          alert("Time is up! Proceeding to experiment.");
-          onNext?.();
+          setShowTimeUp(true);
         }
       }
     };
@@ -142,8 +142,7 @@ useEffect(() => {
     // 🔔 if still visible, trigger immediately
     if (!document.hidden) {
       timeExpiredRef.current = false;
-      alert("Time is up! Proceeding to experiment.");
-      onNext?.();
+      setShowTimeUp(true);
     }
   }, [timeLeft, PID, onNext]);
 
@@ -151,6 +150,16 @@ useEffect(() => {
 
   const formatTime = sec =>
     `${String(Math.floor(sec / 60)).padStart(2, "0")}:${String(sec % 60).padStart(2, "0")}`;
+
+  if (showTimeUp) {
+    return (
+      <InfoOverlay
+        title="Time's Up!"
+        message="Time is up! Proceeding to experiment."
+        onOk={() => { setShowTimeUp(false); onNext?.(); }}
+      />
+    );
+  }
 
   if (!manifest) return <div>Loading…</div>;
 

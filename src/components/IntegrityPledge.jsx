@@ -1,9 +1,12 @@
 import { useState } from "react";
 import { db } from "../config/firestore.js";
 import { doc, updateDoc, serverTimestamp } from "firebase/firestore";
+import InfoOverlay from "./InfoOverlay.jsx";
 
 export default function IntegrityPledge({ onNext, onBack, PID }) {
   const [pledged, setPledged] = useState(false);
+  const [showOverlay, setShowOverlay] = useState(false);
+  const [error, setError] = useState(null);
 
   const handleCheckboxChange = () => setPledged((prev) => !prev);
 
@@ -21,14 +24,22 @@ export default function IntegrityPledge({ onNext, onBack, PID }) {
         console.log("No PID found.");
       }
 
-      alert("Now, you will play 2 comprehension check problems.\n\nPlease carefully read the instructions and make your choices.");
-
-      onNext(); // proceed to experiment
+      setShowOverlay(true);
     } catch (err) {
       console.error("Error saving integrity pledge:", err);
-      alert("Failed to record pledge. Please try again.");
+      setError("Failed to record pledge. Please try again.");
     }
   };
+
+  if (showOverlay) {
+    return (
+      <InfoOverlay
+        title="Comprehension Check"
+        message={"Now, you will play 2 comprehension check problems.\n\nPlease carefully read the instructions and make your choices."}
+        onOk={onNext}
+      />
+    );
+  }
 
   return (
     <div
@@ -65,6 +76,10 @@ export default function IntegrityPledge({ onNext, onBack, PID }) {
             I pledge integrity
           </label>
         </div>
+
+        {error && (
+          <p style={{ color: "red", marginTop: 10 }}>{error}</p>
+        )}
 
         <div
           style={{

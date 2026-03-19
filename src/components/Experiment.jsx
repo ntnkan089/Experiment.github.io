@@ -1,6 +1,7 @@
 import { useState, useEffect, useEffectEvent, useRef } from "react";
 import { db } from "../config/firestore.js";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
+import InfoOverlay from "./InfoOverlay.jsx";
 
 const url = import.meta.env.BASE_URL;
 
@@ -31,6 +32,7 @@ export default function Experiment({ PID, group, onFinish }) {
   const [phase2Trials, setPhase2Trials] = useState([]);
 
   const [nextDisabled, setNextDisabled] = useState(false);
+  const [overlay, setOverlay] = useState(null); // { message, onOk }
 
   // Select experiment structure based on group
   const EFFECTIVE_PHASES =
@@ -265,8 +267,10 @@ const getRowCol = (i) => ({
         return;
       }
 
-      alert("Thanks for completing the main study! Please take a moment to complete a brief survey.");
-      if (onFinish) onFinish();
+      setOverlay({
+        message: "Thanks for completing the main study! Please take a moment to complete a brief survey.",
+        onOk: () => { setOverlay(null); if (onFinish) onFinish(); },
+      });
       return;
     }
 
@@ -280,8 +284,10 @@ const getRowCol = (i) => ({
       return;
     }
 
-    alert("Thanks for completing the main study! Please take a moment to complete a brief survey.");
-    if (onFinish) onFinish();
+    setOverlay({
+      message: "Thanks for completing the main study! Please take a moment to complete a brief survey.",
+      onOk: () => { setOverlay(null); if (onFinish) onFinish(); },
+    });
   };
 
   // Styles
@@ -291,6 +297,10 @@ const getRowCol = (i) => ({
 
   const selectedRowCol = selectedIndex !== null ? getRowCol(selectedIndex) : null;
   const correctRowCol = getRowCol(correctIndex);
+
+  if (overlay) {
+    return <InfoOverlay message={overlay.message} onOk={overlay.onOk} />;
+  }
 
   return (
     <div style={{ maxWidth: 1100, margin: "0 auto", padding: 20 }}>

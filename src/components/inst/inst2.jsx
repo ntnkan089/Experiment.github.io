@@ -1,4 +1,4 @@
-import img2 from './inst_i/image_2.png';
+import img2 from './inst_i/image_2_0.png';
 
 export default function InstPage2() {
   return (

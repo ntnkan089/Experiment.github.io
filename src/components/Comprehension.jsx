@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { db } from "../config/firestore.js";
 import { doc, updateDoc, serverTimestamp } from "firebase/firestore";
+import InfoOverlay from "./InfoOverlay.jsx";
 
 const url = import.meta.env.BASE_URL;
 
@@ -26,6 +27,7 @@ export default function ComprehensionCheck({ onComplete, onFail, PID }) {
   const [selectedIndex, setSelectedIndex] = useState(null);
   const [showCorrect, setShowCorrect] = useState(false);
   const [key, setKey] = useState(0);
+  const [showPassOverlay, setShowPassOverlay] = useState(false);
   const currentCheck = CHECKS[checkIndex];
   const columns = 3;
   const rows = Math.ceil(currentCheck.images.length / columns);
@@ -64,8 +66,7 @@ export default function ComprehensionCheck({ onComplete, onFail, PID }) {
     } else {
       // Passed all comprehension checks
       await updateComprehensionStatus(true);  // <-- ADD THIS
-      alert("Great job! You have passed the comprehension check. You now have 3 minutes for the learning phase.");
-      onComplete();
+      setShowPassOverlay(true);
     }
   } else {
     if (attempt === 1) {
@@ -75,7 +76,6 @@ export default function ComprehensionCheck({ onComplete, onFail, PID }) {
     } else {
       // Wrong on second attempt → end study
       await updateComprehensionStatus(false);  // <-- ADD THIS
-      alert("You did not pass this comprehension check after two attempts. Study ends. Please return your submission by closing this study and clicking “Stop Without Completing” on Prolific.");
       onFail();
     }
   }
@@ -89,6 +89,16 @@ export default function ComprehensionCheck({ onComplete, onFail, PID }) {
 
   const selectedRowCol = selectedIndex !== null ? getRowCol(selectedIndex) : null;
   const correctRowCol = getRowCol(correctIndex);
+
+  if (showPassOverlay) {
+    return (
+      <InfoOverlay
+        title="Comprehension Check Passed!"
+        message="Great job! You have passed the comprehension check. You now have 3 minutes for the learning phase."
+        onOk={onComplete}
+      />
+    );
+  }
 
   return (
     <div style={{ maxWidth: 1100, margin: "0 auto", padding: 20 }}>
